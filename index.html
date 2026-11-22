@@ -4,541 +4,766 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Офис</title>
-<meta name="theme-color" content="#1e3443">
+<meta name="theme-color" content="#1c252d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Офис">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: office floor plan — director's cabinet on top, rooms below as a grid of "floor tiles" */
+/* Layout: one office floor seen from above at an angle, framed like an app window; readable lists below it */
 :root{
-  --floor:#e9edf1;
-  --wall:#1e3443;
+  --page:#e7eaee;
+  --frame:#1c252d;
   --paper:#ffffff;
   --ink:#1b2530;
   --muted:#5f6c79;
   --line:#d6dde4;
-  --wood-top:#d9b48a;
-  --wood-front:#b98b5e;
-  --wood-edge:#a57a50;
-  --chair:#3a4350;
   --accent:#1f7a6d;
-  --accent-ink:#ffffff;
   --ask:#f0a020;
   --ask-soft:#fff4dc;
-  --ok:#2e9e6a;
   --font-head:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --r:14px;
   color-scheme:light;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--floor);color:var(--ink);font:15px/1.45 var(--font-body);
-  padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--page);color:var(--ink);font:15px/1.45 var(--font-body);padding-bottom:env(safe-area-inset-bottom,0px)}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--font-head);margin:0;text-wrap:balance}
 h2{font-size:1.05rem;font-weight:800}
-.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:3px solid var(--ask);outline-offset:2px}
 
 /* Top bar */
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--wall);z-index:20}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--wall);color:#fff}
-.top-in{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
-.brand{display:flex;align-items:center;gap:10px;font:800 1.2rem var(--font-head)}
-.logo{width:30px;height:30px;border-radius:8px;background:var(--ask);color:var(--wall);display:grid;place-items:center;font-size:1rem}
-.top-actions{display:flex;align-items:center;gap:8px}
-.pill{font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.14);color:#dfe8ee}
-
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--frame);z-index:20}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:15;background:var(--frame);color:#fff}
+.top-in{display:flex;align-items:center;gap:10px;padding-block:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font:800 1.15rem var(--font-head);margin-right:auto}
+.logo{width:28px;height:28px;border-radius:8px;background:var(--ask);color:var(--frame);display:grid;place-items:center;font-size:.95rem}
+.chip{font-size:.82rem;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.1);color:#dfe8ee;border:0;min-height:34px;white-space:nowrap}
+.chip b{color:#fff}
+button.chip{cursor:pointer}
+.chip.hot{background:var(--ask);color:var(--frame)}
+.chip.hot b{color:var(--frame)}
 .btn{min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--paper);cursor:pointer;font-weight:600}
-.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ask);outline-offset:2px}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.top .btn{background:#fff;border-color:#fff;color:var(--wall)}
-.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--ask);color:var(--wall);font-size:.75rem;font-weight:800;margin-left:6px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.top .btn{min-height:36px;background:#fff;border-color:#fff;color:var(--frame)}
+.demo{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:#9fb0bd}
 
-main{display:grid;gap:18px;padding-block:16px 40px}
-.card{background:var(--paper);border-radius:var(--r);border:1px solid var(--line)}
+main{display:grid;gap:16px;padding-block:14px 40px}
+.card{background:var(--paper);border-radius:14px;border:1px solid var(--line)}
 
-/* Projects */
-.projects{display:flex;flex-wrap:wrap;gap:8px}
-.proj{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--paper);border:1px solid var(--line);font-size:.88rem}
-.dot{width:9px;height:9px;border-radius:50%;flex:none}
-.proj small{color:var(--muted)}
+/* Floor */
+.floor{background:var(--frame);border-radius:16px;padding:8px;box-shadow:0 10px 30px rgba(20,30,40,.18)}
+.floor-bar{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#9fb0bd;font-size:.78rem;padding:2px 6px 8px}
+.floor-bar b{color:#e6edf2;font-weight:600}
+#scene{display:block;width:100%;height:auto;border-radius:10px;background:#ebe7df;touch-action:manipulation}
+#scene text{font-family:var(--font-body)}
+.wall{fill:#36414c}.base{fill:#262f38}
+.glass{fill:rgba(190,220,238,.20);stroke:#a3c6dc;stroke-width:3}
+.door{stroke:#ebe7df;stroke-width:5}
+.zl{font-weight:700;font-size:9px;letter-spacing:.14em;fill:#8a8f94}
+.zs{font-size:8.5px;fill:#9aa1a8}
+.dt{fill:#cfa675}.df{fill:#a97c4f}.de{fill:#8f6740}
+.tag-bg{fill:#fbf8f2;stroke:#e1d4bf}
+.tag-t{font-weight:600;font-size:8.8px;fill:#1b2530}
+.pill-t{font-weight:700;font-size:7.4px;fill:#fff}
+.nm{font-weight:600;font-size:8.6px;fill:#4f5b67}
+.scr-t{font-weight:600;font-size:8px;fill:#cfe6ff}
+.brd-t{font-size:9px;fill:#1b2530}.brd-n{font-weight:700;font-size:9px;fill:#1f7a6d}
 
-/* Director */
-.director{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;padding:16px;
-  background:linear-gradient(180deg,#f6f1ea 0 62%,var(--paper) 62%)}
-.director .label{font:700 .72rem var(--font-head);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.task-form{display:grid;gap:10px;align-content:start}
-.task-form label{font-size:.82rem;color:var(--muted);font-weight:600}
-.task-form textarea,.task-form select,.q-own input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;min-height:44px}
-.task-form textarea{resize:vertical}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.row>div{display:grid;gap:4px;min-width:0}
-.hint{font-size:.82rem;color:var(--muted);margin:0}
-
-/* Workstation */
-.ws{position:relative;min-width:0}
-.scene{position:relative}
-.scene svg{display:block;width:100%;height:auto}
-.desktop{fill:var(--wood-top)}
-.chair{fill:var(--chair)}
-.desk-front{background:linear-gradient(180deg,var(--wood-front),var(--wood-edge));border-radius:0 0 10px 10px;padding:8px 10px 10px;display:flex;justify-content:center}
-.plate{background:#fbf8f2;border:1px solid #e7dccb;border-radius:6px;padding:6px 10px;max-width:100%;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.12);min-width:0}
-.plate .p-proj{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.72rem;color:var(--muted);font-weight:600;min-width:0}
-.plate .pn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.plate .p-task{font:700 .86rem/1.25 var(--font-head);overflow-wrap:anywhere}
-.who{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 8px;margin-top:8px}
-.who b{font-family:var(--font-head)}
-.who span{font-size:.8rem;color:var(--muted)}
-.status{font-size:.82rem;color:var(--muted);margin-top:2px;min-height:1.2em}
-.ws.stand .status{color:#9a5b00;font-weight:600}
-.bar{height:6px;border-radius:999px;background:#e4e9ee;margin-top:6px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:inherit;transition:width .8s ease}
-.ws.review .bar i{background:#3d7ea6}
-
-.fig{transition:transform .6s cubic-bezier(.3,.7,.3,1)}
-.a-stand{display:none}
-.ws.stand .fig{transform:translateY(-28px)}
-.ws.stand .a-stand{display:inline}
-.ws.stand .a-sit{display:none}
-.ws.busy .a-sit{animation:type .45s ease-in-out infinite alternate}
-.ws.talk.left .fig{transform:translateX(5px) rotate(3deg);transform-origin:100px 120px}
-.ws.talk.right .fig{transform:translateX(-5px) rotate(-3deg);transform-origin:100px 120px}
+.person{cursor:pointer}
+.person .hit{fill:transparent}
+.person .v-chair,.person .arms-type,.person .arm-up,.person .cup,.person .ring{display:none}
+.pose-sitf .body{transform:translateY(12px)}
+.pose-sitf .legs,.pose-sitf .arms-down,.pose-sitf .shadow{display:none}
+.pose-sitf .arms-type,.pose-sitf .v-chair{display:inline}
+.asking .arm-up{display:inline}.asking .arm-r{display:none}
+.pose-cup .cup{display:inline}.pose-cup .arm-r{display:none}
+.person:hover .ring,.person:focus-visible .ring{display:inline}
+.person:focus{outline:none}
+.walk .leg-l{animation:stepA .5s ease-in-out infinite alternate}
+.walk .leg-r{animation:stepA .5s ease-in-out infinite alternate-reverse}
+.walk .upper{animation:bobA .25s ease-in-out infinite alternate}
+.busy .arms-type{animation:typeA .4s ease-in-out infinite alternate}
 .eyes{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
-@keyframes type{to{transform:translateY(1.2px)}}
+.say-q{animation:bobA .6s ease-in-out infinite alternate}
+@keyframes stepA{from{transform:translateY(0)}to{transform:translateY(-2.2px)}}
+@keyframes bobA{to{transform:translateY(-1.5px)}}
+@keyframes typeA{to{transform:translateY(.8px)}}
 @keyframes blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.fan{animation:none}
 
-.bubble{position:absolute;top:2%;left:50%;transform:translateX(-50%);max-width:92%;background:#fff;border:1px solid var(--line);border-radius:12px;padding:5px 9px;font-size:.76rem;line-height:1.25;box-shadow:0 4px 12px rgba(30,52,67,.12);text-align:center;width:max-content}
-.bubble.ask{background:var(--ask);border-color:var(--ask);color:var(--wall);font-weight:800;font-size:.95rem;padding:2px 10px;left:auto;right:8%;transform:none;animation:bob 1s ease-in-out infinite alternate;cursor:pointer}
-@keyframes bob{to{transform:translateY(-3px)}}
-
-/* Questions */
+/* Below the floor */
+.grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:start}
+.col{display:grid;gap:16px;min-width:0}
+.pad{padding:14px 16px}
 .questions{display:grid;gap:12px}
 .questions:empty{display:none}
-.q{padding:14px;border:2px solid var(--ask);background:var(--ask-soft)}
-.q-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.85rem;color:var(--muted)}
+.q{padding:14px;border:2px solid var(--ask);background:var(--ask-soft);border-radius:14px}
+.q-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:.84rem;color:var(--muted)}
 .q-head b{color:var(--ink);font-family:var(--font-head);font-size:.95rem}
 .q-text{margin:8px 0 10px;font:700 1rem/1.35 var(--font-head)}
 .q-opts{display:flex;flex-wrap:wrap;gap:8px}
 .q-opts .btn{background:#fff;border-color:#e8c98a}
 .q-own{display:flex;gap:8px;margin-top:8px}
-.q-own input{flex:1;min-width:0}
+.q-own input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;background:#fff}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none}
 
-/* Rooms */
-.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:18px}
-.room{padding:14px 14px 16px;background:linear-gradient(180deg,#eef3f2 0 58%,var(--paper) 58%)}
-.room-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px}
-.room-head small{color:var(--muted)}
-.stations{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.room.soon{display:grid;place-items:center;text-align:center;background:transparent;border:2px dashed var(--line);color:var(--muted);min-height:160px;padding:20px}
+.staff{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}
+.staff li{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;padding:8px;border-radius:10px;cursor:pointer;align-items:center}
+.staff li:hover{background:#f3f5f7}
+.ava{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font:800 .9rem var(--font-head)}
+.s-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.s-top b{font-family:var(--font-head)}
+.s-top span{font-size:.8rem;color:var(--muted)}
+.s-task{font-size:.84rem;color:var(--ink);overflow-wrap:anywhere}
+.s-st{font-size:.78rem;color:var(--muted)}
+.s-st.wait{color:#9a5b00;font-weight:600}
+.bar{height:5px;border-radius:999px;background:#e4e9ee;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:inherit;transition:width .8s ease}
 
-/* Feed */
-.feed{padding:14px 16px}
-.feed ol{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;max-height:260px;overflow:auto}
+.task-form{display:grid;gap:10px}
+.task-form label{font-size:.82rem;color:var(--muted);font-weight:600}
+.task-form textarea,.task-form select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;min-height:44px}
+.task-form textarea{resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row>div{display:grid;gap:4px;min-width:0}
+.hint{font-size:.82rem;color:var(--muted);margin:0}
+.feed ol{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px;max-height:280px;overflow:auto}
 .feed li{display:flex;gap:10px;font-size:.88rem}
 .feed time{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
 .feed li.me{font-weight:600}
 footer{text-align:center}
 .link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;min-height:44px}
 
-/* Report */
 .modal{position:fixed;inset:0;z-index:30;background:rgba(20,32,42,.45);display:grid;place-items:center;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .sheet{width:min(560px,100%);max-height:100%;overflow:auto;padding:18px}
-.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.summary{font:600 1rem/1.4 var(--font-head);margin:10px 0 4px}
-.rep h3{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.summary{font:600 1rem/1.4 var(--font-head);margin:6px 0 4px}
+.rep h3{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
 .rep ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
 .rep li{font-size:.92rem}
-.rep li .dot{display:inline-block;margin-right:6px}
+.rep li .dot{margin-right:6px}
 .rep li .btn{min-height:36px;padding:0 12px;margin:4px 0 0 6px}
 .rep .none{color:var(--muted)}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.92rem;margin:8px 0 12px}
+.facts dt{color:var(--muted)}.facts dd{margin:0}
 
-@media (max-width:720px){
-  .director{grid-template-columns:1fr;background:var(--paper)}
-  .stations{gap:10px}
-  .plate .p-task{font-size:.8rem}
-}
-@media (max-width:380px){ .row{grid-template-columns:1fr} }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:900px){ .grid2{grid-template-columns:1fr} }
+@media (max-width:480px){ .floor{padding:5px;border-radius:12px} .floor-bar{font-size:.72rem} .floor-bar .tip,.chip.work{display:none} .chip{font-size:.78rem;padding:5px 9px} .top .btn{padding:0 12px} .demo{display:none} .top-in{gap:8px} }
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap top-in">
-    <div class="brand"><span class="logo">О</span>Офис</div>
-    <div class="top-actions">
-      <span class="pill" title="Сейчас офис работает на примерах">Пример</span>
-      <button id="btnReport" class="btn" type="button">Отчёт<span id="askCount" class="badge" hidden></span></button>
-    </div>
+    <div class="brand"><span class="logo">О</span>Офис <span class="demo">пример</span></div>
+    <span class="chip work">Работают: <b id="cWork">0</b></span>
+    <button class="chip" id="cAsk" type="button">Ждут вас: <b id="cAskN">0</b></button>
+    <button id="btnReport" class="btn" type="button">Отчёт</button>
   </div>
 </header>
 
 <main class="wrap">
-  <section class="projects" id="projects" aria-label="Проекты"></section>
-
-  <section class="director card" aria-label="Кабинет директора">
-    <div id="dirStation"></div>
-    <form id="taskForm" class="task-form">
-      <div class="label">Кабинет директора</div>
-      <h2>Новое задание</h2>
-      <label for="taskText">Что нужно сделать</label>
-      <textarea id="taskText" rows="2" placeholder="Например: три варианта иконки" required></textarea>
-      <div class="row">
-        <div><label for="taskProject">Проект</label><select id="taskProject"></select></div>
-        <div><label for="taskRoom">Комната</label>
-          <select id="taskRoom"><option value="design">Дизайн</option><option disabled>Система — скоро</option></select></div>
-      </div>
-      <button class="btn primary" type="submit">Отдать директору</button>
-      <p class="hint">Директор передаст задание в комнату. Итог смотрите в «Отчёте».</p>
-    </form>
+  <section class="floor" aria-label="Этаж офиса">
+    <div class="floor-bar"><span>Этаж 1 · <b id="fbRooms">1 комната</b></span><span class="tip">Нажмите на сотрудника, чтобы открыть его стол</span></div>
+    <svg id="scene" role="img" aria-label="Офис, вид сверху"></svg>
   </section>
 
-  <section id="questions" class="questions" aria-label="Вопросы к вам"></section>
-
-  <section class="rooms" id="rooms">
-    <div class="room card" id="room-design">
-      <div class="room-head"><h2>Дизайн</h2><small>делает и проверяет</small></div>
-      <div class="stations" id="st-design"></div>
+  <div class="grid2">
+    <div class="col">
+      <section id="questions" class="questions" aria-label="Ждут вашего решения"></section>
+      <section class="card pad">
+        <h2>Кто чем занят</h2>
+        <ul class="staff" id="staff"></ul>
+      </section>
     </div>
-    <div class="room soon"><div><h2>Система</h2><p class="hint">Комната появится позже</p></div></div>
-  </section>
-
-  <section class="card feed"><h2>Что происходит</h2><ol id="feed"></ol></section>
+    <div class="col">
+      <section class="card pad">
+        <form id="taskForm" class="task-form">
+          <h2>Задание директору</h2>
+          <label for="taskText">Что нужно сделать</label>
+          <textarea id="taskText" rows="2" placeholder="Например: три варианта иконки" required></textarea>
+          <div class="row">
+            <div><label for="taskProject">Проект</label><select id="taskProject"></select></div>
+            <div><label for="taskRoom">Комната</label>
+              <select id="taskRoom"><option value="design">Дизайн</option><option disabled>Система — скоро</option></select></div>
+          </div>
+          <button class="btn primary" type="submit">Отдать директору</button>
+        </form>
+      </section>
+      <section class="card pad feed"><h2>Что происходит</h2><ol id="feed"></ol></section>
+    </div>
+  </div>
   <footer><button id="btnReset" class="link" type="button">Начать пример заново</button></footer>
 </main>
 
 <div id="modal" class="modal" hidden>
-  <div class="sheet card" role="dialog" aria-modal="true" aria-labelledby="repTitle">
-    <div class="sheet-head"><h2 id="repTitle">Отчёт директора</h2><button class="btn" id="btnClose" type="button">Закрыть</button></div>
-    <div id="report" class="rep"></div>
+  <div class="sheet card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head"><h2 id="sheetTitle"></h2><button class="btn" id="btnClose" type="button">Закрыть</button></div>
+    <div id="sheetBody"></div>
   </div>
 </div>
 
 <script>
-/* ---------- Справочники ---------- */
+/* ================= Справочники ================= */
 const PROJECTS = [
-  {id:'pipo',    name:'Wallet (PIPO)',          color:'#2f6fdf'},
-  {id:'eslarma', name:'Instagram (eslarma.uz)', color:'#d9467a'},
-  {id:'kunlik',  name:'«Кунлик вирд»',          color:'#2e9e6a'}
+  {id:'pipo',    name:'Wallet (PIPO)',          short:'PIPO',    color:'#2f6fdf'},
+  {id:'eslarma', name:'Instagram (eslarma.uz)', short:'eslarma', color:'#d9467a'},
+  {id:'kunlik',  name:'«Кунлик вирд»',          short:'Кунлик',  color:'#2e9e6a'}
 ];
 const ROOMS = { design:{name:'Дизайн', doer:'malika', checker:'timur'} };
 const PEOPLE = {
-  director:{name:'Рустам', role:'Директор', fem:false,
-    look:{skin:'#deb08a', hair:'#7c7c7c', style:'short', beard:true, top:'#2b3a4c', kind:'suit', accent:'#b5413a'}},
-  malika:{name:'Малика', role:'Делает', fem:true, side:'left',
-    look:{skin:'#f0c6a3', hair:'#3a2416', style:'long', top:'#d9734f', kind:'sweater'}},
-  timur:{name:'Тимур', role:'Проверяет', fem:false, side:'right',
-    look:{skin:'#c58c62', hair:'#1e1a18', style:'short', top:'#3d7ea6', kind:'shirt', glasses:true}}
+  director:{name:'Рустам', role:'Директор', fem:false, dat:'Рустаму',
+    look:{skin:'#deb08a', hair:'#7c7c7c', style:'short', beard:true, top:'#2b3a4c', pants:'#2b3a4c', kind:'suit', accent:'#b5413a'}},
+  malika:{name:'Малика', role:'Делает', fem:true, dat:'Малике', ins:'Маликой',
+    look:{skin:'#f0c6a3', hair:'#3a2416', style:'long', top:'#d9734f', pants:'#3f5578', kind:'sweater'}},
+  timur:{name:'Тимур', role:'Проверяет', fem:false, dat:'Тимуру', ins:'Тимуром',
+    look:{skin:'#c58c62', hair:'#1e1a18', style:'short', top:'#3d7ea6', pants:'#2f3640', kind:'shirt', glasses:true}}
 };
 const proj = id => PROJECTS.find(p=>p.id===id) || PROJECTS[0];
+const TALK = {
+  pipo:['Кнопка «Оплатить» заметна?','Да, только крупнее'],
+  eslarma:['Текст на обложке читается?','Читается, чуть контраста'],
+  kunlik:['Иконка понятна сразу?','Да, упрости детали']
+};
 
-/* ---------- Состояние (позже переедет в общую базу) ---------- */
-const KEY='office-demo-v1';
+/* ================= Планировка этажа ================= */
+const LAYOUTS = {
+  wide:{W:1000,H:600, gaps:[328],
+    zones:{director:{x:20,y:92,w:290,h:228}, design:{x:326,y:92,w:340,h:228}, meeting:{x:682,y:92,w:298,h:228},
+           board:{x:20,y:336,w:290,h:248}, system:{x:326,y:336,w:340,h:248}, lounge:{x:682,y:336,w:298,h:248}},
+    wall:[['win',30,130],['win',176,130],['pic',330,34],['scr',392,150],['clock',580],['win',630,130],['win',776,130],['plant',934]]},
+  tall:{W:560,H:1000, gaps:[320,566,772],
+    zones:{director:{x:16,y:92,w:256,h:220}, meeting:{x:288,y:92,w:256,h:220}, design:{x:16,y:328,w:528,h:230},
+           system:{x:16,y:574,w:528,h:190}, lounge:{x:16,y:780,w:528,h:204}},
+    wall:[['win',18,112],['win',140,112],['scr',268,140],['clock',438],['pic',470,34],['plant',528]]}
+};
+let L, G; // текущая планировка и рассчитанные места
+
+function geometry(){
+  const Z=L.zones, g={desks:[], spots:{}};
+  const dz=Z.director, dcx=dz.x+dz.w/2, dd0=dz.y+100;
+  g.desks.push({id:'director', cx:dcx, d0:dd0, w:140});
+  g.spots.director={seat:{x:dcx,y:dd0+12,zone:'director'}};
+  for(const [rid,R] of Object.entries(ROOMS)){
+    const z=Z[rid], cx=z.x+z.w/2, d0=z.y+100, off=Math.min(82, z.w/4);
+    [R.doer,R.checker].forEach((id,i)=>{
+      const x=cx+(i?off:-off), side=i?1:-1;
+      g.desks.push({id, cx:x, d0, w:118});
+      const m=Z.meeting, mx=m.x+m.w/2, my=m.y+m.h/2+30;
+      const lz=Z.lounge;
+      g.spots[id]={
+        seat:{x, y:d0+12, zone:rid},
+        stand:{x:x+side*76, y:d0+62, zone:rid},
+        meet:{x:mx+side*84, y:my+12, zone:'meeting'},
+        lounge:{x:lz.x+62+i*48, y:lz.y+124, zone:'lounge'}
+      };
+    });
+  }
+  return g;
+}
+
+/* ================= Состояние (позже переедет в общую базу) ================= */
+const KEY='office-demo-v2';
 function seed(){
   const now=Date.now();
   return {
-    seq:10,
+    seq:10, talk:0, dirSay:0,
     tasks:[
       {id:1, title:'Экран оплаты', project:'pipo', room:'design', status:'work', progress:38, askDoer:false, askCheck:false},
-      {id:2, title:'Обложка для рилса', project:'eslarma', room:'design', status:'review', progress:100, askDoer:false, askCheck:true, askedCheck:true},
+      {id:2, title:'Обложка для рилса', project:'eslarma', room:'design', status:'review', progress:100, askCheck:true, askedCheck:true},
       {id:3, title:'Иконка приложения', project:'kunlik', room:'design', status:'done', progress:100},
       {id:4, title:'Цвета кнопок', project:'pipo', room:'design', status:'queue', progress:0, askDoer:false, askCheck:true}
     ],
-    questions:[
-      {id:5, taskId:2, from:'timur', text:'Какую обложку взять для рилса?', options:['Светлая, крупный текст','Тёмная, с фото']}
-    ],
+    questions:[{id:5, taskId:2, from:'timur', text:'Какую обложку взять для рилса?', options:['Светлая, крупный текст','Тёмная, с фото']}],
     feed:[
       {t:now-60000*14, text:'Малика закончила «Иконка приложения», Тимур проверил — готово.'},
       {t:now-60000*6, text:'Малика взяла задачу «Экран оплаты».'},
       {t:now-60000*2, text:'Тимур встал: нужен ваш выбор по «Обложка для рилса».'}
-    ],
-    talk:0, dirSay:0
+    ]
   };
 }
 let S;
-try{ S = JSON.parse(localStorage.getItem(KEY)) }catch(e){}
-if(!S || !S.tasks) S = seed();
+try{ S=JSON.parse(localStorage.getItem(KEY)) }catch(e){}
+if(!S||!S.tasks) S=seed();
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
 
-/* ---------- Помощники ---------- */
-const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const rnd = (a,b) => a + Math.floor(Math.random()*(b-a+1));
-function shade(hex, k){ // k<0 темнее, k>0 светлее
-  const n=parseInt(hex.slice(1),16); let r=n>>16, g=n>>8&255, b=n&255;
-  const f=v=>Math.round(k<0? v*(1+k) : v+(255-v)*k);
-  return '#'+[f(r),f(g),f(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
-}
-function log(text, me){ S.feed.push({t:Date.now(), text, me:!!me}); if(S.feed.length>40) S.feed.shift(); }
+/* ================= Помощники ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const cut=(s,n)=>s.length>n? s.slice(0,n-1)+'…' : s;
+function shade(hex,k){const n=parseInt(hex.slice(1),16);const f=v=>Math.round(k<0?v*(1+k):v+(255-v)*k);
+  return '#'+[n>>16,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,'0')).join('');}
+function log(text,me){ S.feed.push({t:Date.now(),text,me:!!me}); if(S.feed.length>40) S.feed.shift(); }
 
-/* ---------- Человечек за столом ---------- */
-function sceneSVG(p){
-  const L=p.look, s=L.skin, h=L.hair, t=L.top, sk=shade(s,-.14);
-  const hairBack = L.style==='long' ? `<path d="M83 60 Q82 37 100 36 Q118 37 117 60 L121 100 Q100 106 79 100 Z" fill="${h}"/>` : '';
-  const hairFront = L.style==='long'
-    ? `<path d="M85 63 Q84 39 100 39 Q116 39 115 63 Q113 50 104 47 Q99 54 87 55 Z" fill="${h}"/>`
-    : `<path d="M85 59 Q84 40 100 39.5 Q116 40 115 59 Q113 50 106 48 Q97 51 88 51 Q86 54 85 59 Z" fill="${h}"/>`;
+/* ================= Рисунок человечка (начало координат — ступни) ================= */
+function personSVG(id){
+  const p=PEOPLE[id], L_=p.look, s=L_.skin, h=L_.hair, t=L_.top, pn=L_.pants, sk=shade(s,-.15);
+  const hairBack = L_.style==='long' ? `<path d="M-7.3 -56 Q-8 -64.5 0 -64.5 Q8 -64.5 7.3 -56 L8.3 -41.5 Q0 -39 -8.3 -41.5 Z" fill="${h}"/>` : '';
+  const hairFront = L_.style==='long'
+    ? `<path d="M-7 -53 Q-7.6 -64 0 -64 Q7.6 -64 7 -53 Q5.6 -59.5 1 -59 Q-3.5 -58 -7 -53 Z" fill="${h}"/>`
+    : `<path d="M-6.9 -54.3 Q-7.1 -63.8 0 -63.8 Q7.1 -63.8 6.9 -54.3 Q5.9 -59.3 2 -59.4 Q-2.6 -58.9 -6.9 -54.3 Z" fill="${h}"/>`;
   const neck = {
-    suit:`<path d="M92 80 L100 99 L108 80 Z" fill="#f3f3f1"/><path d="M99 83 L101 83 L103.5 101 L100 106 L96.5 101 Z" fill="${L.accent}"/><path d="M91 80 L84 85 L98 116 Z M109 80 L116 85 L102 116 Z" fill="${shade(t,-.25)}"/>`,
-    shirt:`<path d="M92.5 79 L100 89 L107.5 79 L104 77.5 L100 83 L96 77.5 Z" fill="${shade(t,.45)}"/>`,
-    sweater:`<path d="M91.5 80 Q100 88 108.5 80" stroke="${shade(t,-.2)}" stroke-width="3" fill="none"/>`
-  }[L.kind];
-  const beard = L.beard ? `<path d="M86 61 Q86.5 79 100 79.5 Q113.5 79 114 61 Q112 71 104.5 71 Q100 69.5 95.5 71 Q88 71 86 61 Z" fill="${h}"/>` : '';
-  const glasses = L.glasses ? `<g stroke="#20262c" stroke-width="1.3" fill="rgba(255,255,255,.15)"><circle cx="94.3" cy="61" r="4.3"/><circle cx="105.7" cy="61" r="4.3"/><path d="M98.6 60.5 L101.4 60.5" fill="none"/></g>` : '';
-  const arm = (d)=>`<path d="${d}" stroke="${t}" stroke-width="9" stroke-linecap="round" fill="none"/>`;
-  return `<svg viewBox="0 0 200 130" role="img" aria-label="${esc(p.name)} за столом">
-  <rect x="73" y="66" width="54" height="64" rx="13" class="chair"/>
-  <g class="fig">
-    ${hairBack}
-    <rect x="95" y="70" width="10" height="13" rx="3" fill="${sk}"/>
-    <path d="M73 160 L76 94 Q78 81 100 80 Q122 81 124 94 L127 160 Z" fill="${t}"/>
-    ${neck}
-    <g class="a-sit">${arm('M80 93 Q73 110 89 114')}${arm('M120 93 Q127 110 111 114')}
-      <circle cx="90.5" cy="114" r="4" fill="${s}"/><circle cx="109.5" cy="114" r="4" fill="${s}"/></g>
-    <g class="a-stand">${arm('M80 93 Q74 113 77 130')}${arm('M120 93 Q134 80 131 58')}
-      <circle cx="131" cy="54" r="4.6" fill="${s}"/></g>
-    <circle cx="86" cy="62" r="3.6" fill="${s}"/><circle cx="114" cy="62" r="3.6" fill="${s}"/>
-    <ellipse cx="100" cy="60" rx="14" ry="16.5" fill="${s}"/>
-    ${beard}${hairFront}
-    <circle cx="91" cy="67" r="2.6" fill="#e2725b" opacity=".2"/><circle cx="109" cy="67" r="2.6" fill="#e2725b" opacity=".2"/>
-    <g class="eyes"><ellipse cx="94.3" cy="61" rx="1.7" ry="2.1" fill="#241d1a"/><ellipse cx="105.7" cy="61" rx="1.7" ry="2.1" fill="#241d1a"/></g>
-    <path d="M91.3 56.3 Q94.3 54.8 97.3 56.3 M102.7 56.3 Q105.7 54.8 108.7 56.3" stroke="${shade(h,-.2)}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    ${glasses}
-    <path d="M100 62.5 Q102 66.6 99.4 67.3" stroke="${sk}" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-    <path d="M96 71.3 Q100 74 104 71.3" stroke="${L.beard?'#f1d0c0':'#9a4b3c'}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-  </g>
-  <rect x="79" y="96" width="42" height="21" rx="2.5" fill="#cdd4dc"/><circle cx="100" cy="106.5" r="2.3" fill="#eef1f4"/>
-  <rect x="0" y="116" width="200" height="14" class="desktop"/>
-  <path d="M30 116 L32.5 104 L45.5 104 L48 116 Z" fill="#b5653f"/>
-  <path d="M39 104 Q29 93 32 84 Q40 92 39 104 Z M39 104 Q49 91 47 82 Q38 92 39 104 Z" fill="#3f8f5a"/>
-  <rect x="148" y="104" width="11" height="12" rx="2" fill="#fff" stroke="#c9ced6"/>
-  <path d="M159 107 Q163.5 110 159 113" stroke="#c9ced6" fill="none" stroke-width="1.6"/>
-</svg>`;
-}
-function stationHTML(id){
-  const p=PEOPLE[id];
-  return `<div class="ws ${p.side||''}" id="ws-${id}">
-    <div class="scene">${sceneSVG(p)}<div class="bubble" hidden></div></div>
-    <div class="desk-front"><div class="plate"><div class="p-proj"><span class="dot"></span><span class="pn"></span></div><div class="p-task"></div></div></div>
-    <div class="who"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div>
-    <div class="status"></div>
-    <div class="bar"><i></i></div>
-  </div>`;
+    suit:`<path d="M-3.2 -45.5 L0 -38.5 L3.2 -45.5 Z" fill="#f3f3f1"/><path d="M-.8 -44.3 L.8 -44.3 L1.7 -33.5 L0 -31.8 L-1.7 -33.5 Z" fill="${L_.accent}"/><path d="M-3.6 -45.5 L-6.4 -44 L-1.2 -30 Z M3.6 -45.5 L6.4 -44 L1.2 -30 Z" fill="${shade(t,-.3)}"/>`,
+    shirt:`<path d="M-3.6 -45.8 L0 -41.6 L3.6 -45.8 L2 -46.6 L0 -43.8 L-2 -46.6 Z" fill="${shade(t,.5)}"/><path d="M0 -41.6 L0 -24" stroke="${shade(t,-.2)}" stroke-width=".6"/>`,
+    sweater:`<path d="M-3.8 -45.4 Q0 -41.6 3.8 -45.4" stroke="${shade(t,-.22)}" stroke-width="1.3" fill="none"/>`
+  }[L_.kind];
+  const arm=(d)=>`<path d="${d}" stroke="${t}" stroke-width="4.3" stroke-linecap="round" fill="none"/>`;
+  const hand=(x,y)=>`<circle cx="${x}" cy="${y}" r="2.1" fill="${s}"/>`;
+  const beard = L_.beard ? `<path d="M-6.5 -54 Q-6.2 -45.6 0 -45.6 Q6.2 -45.6 6.5 -54 Q5 -50.2 2.2 -50.6 Q0 -51.4 -2.2 -50.6 Q-5 -50.2 -6.5 -54 Z" fill="${h}"/>` : '';
+  const glasses = L_.glasses ? `<g stroke="#1f2428" stroke-width=".7" fill="rgba(255,255,255,.18)"><circle cx="-2.5" cy="-55.2" r="2"/><circle cx="2.5" cy="-55.2" r="2"/><path d="M-.5 -55.3 L.5 -55.3" fill="none"/></g>` : '';
+  const leg=(cls,x1,x2,sx)=>`<g class="${cls}"><path d="M${x1} -23.5 L${x2} -23.5 L${x2+(x1<0?-.5:.5)} -2 L${x1+(x1<0?1:-1)} -2 Z" fill="${pn}"/><ellipse cx="${sx}" cy="-1.3" rx="3.7" ry="1.7" fill="#23272c"/></g>`;
+  return `<g class="person" id="p-${id}" tabindex="0" role="button" aria-label="${esc(p.name)}, ${esc(p.role.toLowerCase())}"><g transform="scale(1.4)">
+    <ellipse class="shadow" cx="0" cy="0" rx="10" ry="3" fill="rgba(0,0,0,.14)"/>
+    <ellipse class="ring" cx="0" cy="0" rx="14" ry="4.5" fill="none" stroke="#f0a020" stroke-width="2"/>
+    <g class="legs">${leg('leg-l',-8.3,-.7,-4.6)}${leg('leg-r',.7,8.3,4.6)}</g>
+    <g class="body"><g class="upper">
+      <rect class="v-chair" x="-11" y="-44" width="22" height="24" rx="4" fill="#3a4350"/>
+      ${hairBack}
+      <rect x="-2" y="-49" width="4" height="5" rx="1.2" fill="${sk}"/>
+      <path d="M-10 -41 Q-10 -45.6 -5.5 -45.6 L5.5 -45.6 Q10 -45.6 10 -41 L8.6 -22.5 L-8.6 -22.5 Z" fill="${t}"/>
+      ${neck}
+      <g class="arms-down">${arm('M-9.6 -43 Q-12 -34 -11.2 -25.5')}${hand(-11.2,-24.6)}
+        <g class="arm-r">${arm('M9.6 -43 Q12 -34 11.2 -25.5')}${hand(11.2,-24.6)}</g></g>
+      <g class="arms-type">${arm('M-9.6 -43 Q-13 -31 -6 -22')}${arm('M9.6 -43 Q13 -31 6 -22')}</g>
+      <g class="arm-up">${arm('M9.6 -43 Q14 -52 13.5 -61')}${hand(13.6,-62.6)}</g>
+      <g class="cup">${arm('M9.6 -43 Q12.5 -36 8 -32')}<rect x="5.5" y="-36.5" width="5" height="6" rx="1" fill="#fff" stroke="#c9ced6" stroke-width=".6"/>${hand(7.6,-31.6)}</g>
+      <circle cx="-6.7" cy="-55" r="1.5" fill="${s}"/><circle cx="6.7" cy="-55" r="1.5" fill="${s}"/>
+      <ellipse cx="0" cy="-55" rx="6.7" ry="7.7" fill="${s}"/>
+      ${beard}${hairFront}
+      <circle cx="-3.9" cy="-51.7" r="1.3" fill="#e2725b" opacity=".22"/><circle cx="3.9" cy="-51.7" r="1.3" fill="#e2725b" opacity=".22"/>
+      <g class="eyes"><ellipse cx="-2.5" cy="-55.2" rx=".85" ry="1.05" fill="#241d1a"/><ellipse cx="2.5" cy="-55.2" rx=".85" ry="1.05" fill="#241d1a"/></g>
+      <path d="M-3.7 -57.7 L-1.4 -58.1 M1.4 -58.1 L3.7 -57.7" stroke="${shade(h,-.25)}" stroke-width=".75" stroke-linecap="round"/>
+      ${glasses}
+      <path d="M0 -54 Q.9 -52.3 -.2 -52" stroke="${sk}" stroke-width=".6" fill="none" stroke-linecap="round"/>
+      <path d="M-1.8 -50 Q0 -48.8 1.8 -50" stroke="${L_.beard?'#efcfbf':'#9a4b3c'}" stroke-width=".75" fill="none" stroke-linecap="round"/>
+      <rect class="hit" x="-14" y="-68" width="28" height="70"/>
+      <g class="say" transform="translate(0,-75) scale(.8)"></g>
+    </g></g>
+  </g></g>`;
 }
 
-/* ---------- Кто чем занят ---------- */
-const doerTask    = room => S.tasks.find(t=>t.room===room && t.status==='work');
-const checkerTask = room => S.tasks.find(t=>t.room===room && t.status==='review');
-const qFrom = id => S.questions.find(q=>q.from===id);
+/* ================= Рисунок этажа ================= */
+function deskSVG(d){
+  const x=d.cx-d.w/2, d0=d.d0;
+  return `<g>
+    <rect x="${x}" y="${d0}" width="${d.w}" height="26" rx="2" class="dt"/>
+    <rect x="${x}" y="${d0+26}" width="${d.w}" height="24" class="df"/>
+    <rect x="${x}" y="${d0+48}" width="${d.w}" height="3" class="de"/>
+    <rect x="${d.cx-13}" y="${d0-10}" width="26" height="15" rx="2" fill="#c9d0d8"/><circle cx="${d.cx}" cy="${d0-3}" r="1.8" fill="#eef1f4"/>
+    <rect x="${d.cx-15}" y="${d0+5}" width="30" height="3" rx="1" fill="#b7bec6"/>
+    <rect x="${x+d.w-17}" y="${d0+7}" width="7" height="8" rx="1.5" fill="#fff" stroke="#c9ced6" stroke-width=".7"/>
+    <path d="M${x+9} ${d0+16} l2 -8 h7 l2 8 z" fill="#b5653f"/><path d="M${x+14} ${d0+8} q-6 -7 -3 -12 q4 5 3 12 z M${x+14} ${d0+8} q6 -8 4 -13 q-5 5 -4 13 z" fill="#3f8f5a"/>
+    <g id="tag-${d.id}">
+      <rect class="tag-bg" x="${x+6}" y="${d0+29}" width="${d.w-12}" height="16" rx="3"/>
+      <rect class="pill" x="${x+9}" y="${d0+31.5}" width="30" height="11" rx="2.5" fill="#999"/>
+      <text class="pill-t" x="${x+12}" y="${d0+39.6}"></text>
+      <text class="tag-t" x="${x+44}" y="${d0+40}"></text>
+    </g>
+    <text class="nm" x="${d.cx}" y="${d0+63}" text-anchor="middle" id="nm-${d.id}"></text>
+  </g>`;
+}
+function windowSVG(x,w){
+  let b=''; const hs=[22,34,16,28,40,20,30,24];
+  for(let i=0,bx=x+4;bx<x+w-8;i++){const bw=10+(i*7)%9, bh=hs[i%hs.length]; b+=`<rect x="${bx}" y="${62-bh}" width="${bw}" height="${bh}" fill="${i%2?'#6f8296':'#7d90a4'}"/>`; bx+=bw+2;}
+  return `<rect x="${x}" y="14" width="${w}" height="48" rx="3" fill="url(#sky)"/>${b}
+    <rect x="${x}" y="14" width="${w}" height="48" rx="3" fill="none" stroke="#56636f" stroke-width="3"/>
+    <path d="M${x+w/2} 14 V62" stroke="#56636f" stroke-width="2"/>`;
+}
+function wallItem(it){
+  const [k,x,w]=it;
+  if(k==='win') return windowSVG(x,w);
+  if(k==='pic') return `<rect x="${x}" y="20" width="${w}" height="40" rx="2" fill="#e9dcc4" stroke="#b8935c" stroke-width="3"/><circle cx="${x+w/2}" cy="34" r="7" fill="#d98b5f"/><path d="M${x+4} 56 Q${x+w/2} 42 ${x+w-4} 56 Z" fill="#6f9a7b"/>`;
+  if(k==='scr') return `<rect x="${x}" y="14" width="${w}" height="50" rx="3" fill="#18222b" stroke="#0e151b" stroke-width="2"/>
+    <text class="scr-t" x="${x+10}" y="29" id="scrDone"></text><text class="scr-t" x="${x+10}" y="42" id="scrWork"></text>
+    <polyline points="${x+10},56 ${x+30},50 ${x+50},53 ${x+70},44 ${x+90},47 ${x+110},38 ${x+w-10},34" fill="none" stroke="#4fd1a5" stroke-width="2"/>`;
+  if(k==='clock') return `<circle cx="${x+15}" cy="38" r="15" fill="#fff" stroke="#56636f" stroke-width="2.5"/>
+    <line id="clkH" x1="${x+15}" y1="38" x2="${x+15}" y2="30" stroke="#1b2530" stroke-width="2.2" stroke-linecap="round"/>
+    <line id="clkM" x1="${x+15}" y1="38" x2="${x+15}" y2="26" stroke="#1b2530" stroke-width="1.4" stroke-linecap="round"/>`;
+  if(k==='plant') return `<path d="M${x} 78 l3 -16 h14 l3 16 z" fill="#b5653f"/><path d="M${x+10} 62 q-14 -14 -8 -32 q10 12 8 32 z M${x+10} 62 q14 -16 10 -34 q-12 12 -10 34 z" fill="#3f8f5a"/>`;
+  return '';
+}
+function glassRoom(z,label,sub){
+  return `<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="4" class="glass"/>
+    <line x1="${z.x+z.w/2-26}" y1="${z.y+z.h}" x2="${z.x+z.w/2+26}" y2="${z.y+z.h}" class="door"/>
+    <text class="zl" x="${z.x+12}" y="${z.y+18}">${label}</text>${sub?`<text class="zs" x="${z.x+12}" y="${z.y+30}">${sub}</text>`:''}`;
+}
+function plant(x,y,k=1){return `<g transform="translate(${x},${y}) scale(${k})"><path d="M-8 0 l2 -12 h12 l2 12 z" fill="#b5653f"/><path d="M0 -12 q-12 -10 -8 -26 q9 9 8 26 z M0 -12 q12 -12 9 -28 q-10 10 -9 28 z M0 -12 q-2 -14 1 -22" fill="#3f8f5a" stroke="#357a4c" stroke-width=".5"/></g>`;}
 
-function makeQuestion(task, from){
-  const P = {
-    pipo:['Какой цвет главной кнопки оставить?',['Зелёный, как сейчас','Синий, как логотип']],
+function buildScene(){
+  const {W,H,zones:Z}=L;
+  let s=`<defs>
+    <pattern id="tile" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#ebe7df"/><path d="M40 0H0V40" fill="none" stroke="#dcd5c9" stroke-width="1"/></pattern>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fbfe8"/><stop offset="1" stop-color="#dcebf8"/></linearGradient>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#tile)"/>
+  <rect width="${W}" height="78" class="wall"/><rect y="78" width="${W}" height="6" class="base"/>
+  ${L.wall.map(wallItem).join('')}`;
+
+  // Кабинет директора
+  const dz=Z.director;
+  s+=glassRoom(dz,'КАБИНЕТ ДИРЕКТОРА');
+  s+=`<ellipse cx="${dz.x+dz.w/2}" cy="${dz.y+128}" rx="${Math.min(110,dz.w/2-14)}" ry="44" fill="#d9cdb8" opacity=".55"/>
+      <rect x="${dz.x+14}" y="${dz.y+40}" width="44" height="46" rx="2" fill="#7a5a3d"/><rect x="${dz.x+18}" y="${dz.y+46}" width="36" height="16" fill="#e8dcc5"/><rect x="${dz.x+18}" y="${dz.y+66}" width="36" height="16" fill="#c9b79a"/>
+      ${plant(dz.x+dz.w-26,dz.y+90,1.1)}`;
+
+  // Переговорка
+  const mz=Z.meeting, mx=mz.x+mz.w/2, my=mz.y+mz.h/2+30;
+  s+=glassRoom(mz,'ПЕРЕГОВОРКА','здесь советуются');
+  s+=`<rect x="${mx-52}" y="${mz.y+34}" width="104" height="34" rx="2" fill="#fff" stroke="#c8ced5" stroke-width="2"/>
+      <path d="M${mx-40} ${mz.y+46} q10 -6 20 0 t20 0" stroke="#2f6fdf" stroke-width="1.5" fill="none"/><path d="M${mx-40} ${mz.y+57} h46" stroke="#d9467a" stroke-width="1.5"/><path d="M${mx+16} ${mz.y+42} l8 10 l12 -14" stroke="#2e9e6a" stroke-width="1.5" fill="none"/>`;
+  [-40,0,40].forEach(o=>{ s+=`<rect x="${mx+o-9}" y="${my-34}" width="18" height="12" rx="4" fill="#4a5562"/>`; });
+  s+=`<ellipse cx="${mx}" cy="${my}" rx="64" ry="24" fill="#e9e3d8" stroke="#cdbfa9" stroke-width="2"/>`;
+  [-40,0,40].forEach(o=>{ s+=`<rect x="${mx+o-9}" y="${my+22}" width="18" height="10" rx="4" fill="#4a5562"/>`; });
+  s+=`<circle cx="${mx-20}" cy="${my-4}" r="3.5" fill="#fff" stroke="#c9ced6"/><rect x="${mx+8}" y="${my-6}" width="22" height="12" rx="1" fill="#fbf8f2" stroke="#d8ccb8"/>`;
+
+  // Рабочие комнаты
+  for(const [rid,R] of Object.entries(ROOMS)){
+    const z=Z[rid];
+    s+=`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="10" fill="#dfe8e3" opacity=".7"/>
+      <text class="zl" x="${z.x+12}" y="${z.y+18}">${R.name.toUpperCase()}</text><text class="zs" x="${z.x+12}" y="${z.y+30}">один делает · второй проверяет</text>
+      ${plant(z.x+z.w-22,z.y+56,.9)}`;
+  }
+  // Будущая комната
+  const sz=Z.system;
+  s+=`<rect x="${sz.x+2}" y="${sz.y+2}" width="${sz.w-4}" height="${sz.h-4}" rx="10" fill="none" stroke="#b9c2cb" stroke-width="2" stroke-dasharray="8 6"/>
+    <text x="${sz.x+sz.w/2}" y="${sz.y+sz.h/2-4}" text-anchor="middle" style="font-weight:700;font-size:13px;fill:#7d8792">Комната «Система»</text>
+    <text x="${sz.x+sz.w/2}" y="${sz.y+sz.h/2+13}" text-anchor="middle" class="zs">появится позже — этаж вырастет сам</text>`;
+  [-1,1].forEach(k=>{ s+=`<rect x="${sz.x+sz.w/2+k*80-50}" y="${sz.y+sz.h/2+30}" width="100" height="30" rx="3" fill="none" stroke="#c9d0d7" stroke-dasharray="4 4"/>`; });
+
+  // Доска проектов (только на широком экране)
+  if(Z.board){
+    const b=Z.board;
+    s+=`<text class="zl" x="${b.x+12}" y="${b.y+18}">ДОСКА ПРОЕКТОВ</text>
+      <rect x="${b.x+24}" y="${b.y+34}" width="${b.w-48}" height="${30+PROJECTS.length*24}" rx="4" fill="#fff" stroke="#c8ced5" stroke-width="2"/>
+      ${PROJECTS.map((p,i)=>`<circle cx="${b.x+42}" cy="${b.y+56+i*24}" r="4.5" fill="${p.color}"/><text class="brd-t" x="${b.x+54}" y="${b.y+59+i*24}">${esc(p.name)}</text><text class="brd-n" id="brd-${p.id}" x="${b.x+b.w-36}" y="${b.y+59+i*24}" text-anchor="end"></text>`).join('')}
+      <path d="M${b.x+60} ${b.y+34+30+PROJECTS.length*24} l-8 40 M${b.x+b.w-60} ${b.y+34+30+PROJECTS.length*24} l8 40" stroke="#8a929b" stroke-width="3"/>
+      ${plant(b.x+30,b.y+b.h-14,1)}${plant(b.x+b.w-30,b.y+b.h-14,1.2)}`;
+  }
+
+  // Кофе-поинт
+  const lz=Z.lounge;
+  s+=`<text class="zl" x="${lz.x+12}" y="${lz.y+18}">КОФЕ И ОТДЫХ</text>
+    <rect x="${lz.x+24}" y="${lz.y+44}" width="150" height="20" fill="#e4ddd2"/><rect x="${lz.x+24}" y="${lz.y+64}" width="150" height="26" fill="#9aa4ae"/>
+    <rect x="${lz.x+36}" y="${lz.y+26}" width="22" height="26" rx="3" fill="#2a3036"/><rect x="${lz.x+42}" y="${lz.y+38}" width="10" height="8" fill="#5c6670"/>
+    <rect x="${lz.x+70}" y="${lz.y+46}" width="6" height="7" rx="1" fill="#fff" stroke="#c9ced6" stroke-width=".7"/><rect x="${lz.x+80}" y="${lz.y+46}" width="6" height="7" rx="1" fill="#fff" stroke="#c9ced6" stroke-width=".7"/>
+    <ellipse cx="${lz.x+lz.w-95}" cy="${lz.y+lz.h-58}" rx="80" ry="34" fill="#c9b79a" opacity=".55"/>
+    <rect x="${lz.x+lz.w-160}" y="${lz.y+lz.h-104}" width="130" height="22" rx="6" fill="#5b6b7a"/>
+    <rect x="${lz.x+lz.w-164}" y="${lz.y+lz.h-84}" width="138" height="18" rx="5" fill="#6d7e8e"/>
+    <rect x="${lz.x+lz.w-168}" y="${lz.y+lz.h-100}" width="12" height="36" rx="5" fill="#53626f"/><rect x="${lz.x+lz.w-38}" y="${lz.y+lz.h-100}" width="12" height="36" rx="5" fill="#53626f"/>
+    <rect x="${lz.x+lz.w-130}" y="${lz.y+lz.h-52}" width="70" height="16" rx="3" fill="#8a6a4a"/>
+    ${plant(lz.x+lz.w-14-6,lz.y+lz.h-110,1.2)}
+    <path d="M${lz.x+lz.w-190} ${lz.y+lz.h-30} v-60" stroke="#444" stroke-width="2"/><circle cx="${lz.x+lz.w-190}" cy="${lz.y+lz.h-94}" r="8" fill="#fff4cf" stroke="#d9c88f"/>`;
+
+  s+=`<g id="lay-behind"></g><g id="lay-desks">${G.desks.map(deskSVG).join('')}</g><g id="lay-front"></g>`;
+  const svg=$('#scene');
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML=s;
+  const front=$('#lay-front');
+  for(const id of Object.keys(PEOPLE)) front.insertAdjacentHTML('beforeend', personSVG(id));
+  document.querySelectorAll('.person').forEach(el=>{
+    const id=el.id.slice(2);
+    el.addEventListener('click',()=>openPerson(id));
+    el.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openPerson(id);} });
+  });
+}
+
+/* ================= Перемещения ================= */
+const R={}; for(const id of Object.keys(PEOPLE)) R[id]={place:null,x:null,y:null,walking:false};
+const SPEED=95; // единиц этажа в секунду
+const tr=(x,y)=>`translate(${x}px, ${y}px)`;
+function setPose(el,pose){ ['sitf','stand','walk','cup'].forEach(p=>el.classList.remove('pose-'+p)); el.classList.add('pose-'+pose); el.classList.toggle('walk', pose==='walk'); }
+function toLayer(el,layer){ const L_=$('#lay-'+layer); if(el.parentNode!==L_) L_.appendChild(el); }
+function pickGap(y1,y2){
+  const lo=Math.min(y1,y2), hi=Math.max(y1,y2);
+  const between=L.gaps.filter(g=>g>lo&&g<hi);
+  const pool=between.length?between:L.gaps;
+  return pool.reduce((a,b)=>Math.abs(b-y1)<Math.abs(a-y1)?b:a);
+}
+function goTo(id,place,instant){
+  const r=R[id]; if(r.walking) return;
+  if(r.place===place && !instant) return;
+  const sp=G.spots[id][place], el=$('#p-'+id);
+  const pose = place==='seat'?'sitf' : place==='lounge'?'cup' : 'stand';
+  const finish=()=>{ r.place=place; setPose(el,pose); toLayer(el, place==='seat'?'behind':'front'); paint(); };
+  if(instant || r.x==null || reduceMotion){ el.style.transform=tr(sp.x,sp.y); r.x=sp.x; r.y=sp.y; finish(); return; }
+  const st=G.spots[id].stand, pts=[[r.x,r.y]];
+  let zone = r.place ? G.spots[id][r.place].zone : sp.zone;
+  if(r.place==='seat'){ pts.push([st.x,r.y],[st.x,st.y]); }
+  const via = place==='seat' ? [st.x,st.y] : [sp.x,sp.y];
+  const cur=pts[pts.length-1];
+  if(zone!==sp.zone){ const g=pickGap(cur[1],via[1]); pts.push([cur[0],g],[via[0],g]); }
+  if(place==='seat'){ pts.push([st.x,st.y],[st.x,sp.y]); }
+  pts.push([sp.x,sp.y]);
+  const P=pts.filter((p,i)=>i===0||p[0]!==pts[i-1][0]||p[1]!==pts[i-1][1]);
+  const d=[0]; for(let i=1;i<P.length;i++) d.push(d[i-1]+Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]));
+  const total=d[d.length-1]; if(total<1){ el.style.transform=tr(sp.x,sp.y); r.x=sp.x; r.y=sp.y; finish(); return; }
+  r.walking=true; setPose(el,'walk'); el.classList.remove('asking'); setSay(el,''); toLayer(el,'front');
+  const dur=total/SPEED*1000;
+  const a=el.animate(P.map((p,i)=>({transform:tr(p[0],p[1]),offset:d[i]/total})),{duration:dur,easing:'linear',fill:'forwards'});
+  let over=false;
+  const arrive=()=>{ if(over) return; over=true; el.style.transform=tr(sp.x,sp.y); a.cancel(); r.x=sp.x; r.y=sp.y; r.walking=false; finish(); };
+  a.finished.then(arrive).catch(()=>{});
+  setTimeout(arrive, dur+250);
+}
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function setSay(el,text,kind){
+  const g=el.querySelector('.say'); if(g.dataset.v===(text||'')+(kind||'')) return;
+  g.dataset.v=(text||'')+(kind||'');
+  if(!text){ g.innerHTML=''; return; }
+  if(kind==='ask'){ g.innerHTML=`<g class="say-q"><circle r="9" fill="#f0a020" stroke="#fff" stroke-width="1.5"/><text y="4.2" text-anchor="middle" style="font-weight:800;font-size:12px;fill:#1c252d">?</text></g>`; return; }
+  const w=Math.round(text.length*4.7+14);
+  g.innerHTML=`<rect x="${-w/2}" y="-11" width="${w}" height="17" rx="8" fill="#fff" stroke="#cfd6dd"/><path d="M-3 6 L0 10 L3 6 Z" fill="#fff"/><text y="1" text-anchor="middle" style="font-size:8.5px;fill:#1b2530">${esc(text)}</text>`;
+}
+
+/* ================= Логика офиса (пример) ================= */
+const doerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='work');
+const checkerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='review');
+const qFrom=id=>S.questions.find(q=>q.from===id);
+const atDesk=id=>R[id].place==='seat'&&!R[id].walking;
+const inMeeting=id=>R[id].place==='meet'&&!R[id].walking;
+
+function makeQuestion(task,from){
+  const P={pipo:['Какой цвет главной кнопки оставить?',['Зелёный, как сейчас','Синий, как логотип']],
     eslarma:['Какую обложку взять для рилса?',['Светлая, крупный текст','Тёмная, с фото']],
-    kunlik:['Какой шрифт взять для заголовков?',['Строгий','Мягкий, округлый']]
-  };
-  let text, options;
+    kunlik:['Какой шрифт взять для заголовков?',['Строгий','Мягкий, округлый']]};
+  let text,options;
   if(from===ROOMS[task.room].doer){ text=`Подготовила два варианта для «${task.title}». Какой берём?`; options=['Вариант A — проще','Вариант B — ярче']; }
-  else { [text, options] = P[task.project]; }
-  S.questions.push({id:++S.seq, taskId:task.id, from, text, options});
-  log(`${PEOPLE[from].name} ${PEOPLE[from].fem?'встала':'встал'}: нужен ваш выбор по «${task.title}».`);
+  else [text,options]=P[task.project];
+  S.questions.push({id:++S.seq,taskId:task.id,from,text,options});
+  const p=PEOPLE[from]; log(`${p.name} ${p.fem?'встала':'встал'}: нужен ваш выбор по «${task.title}».`);
 }
 
-/* ---------- Ход времени (пример работы) ---------- */
 function tick(){
   if(S.dirSay>0) S.dirSay--;
-  if(S.talk>0){ S.talk--; render(); save(); return; }
-  for(const [rid, R] of Object.entries(ROOMS)){
-    const dName=PEOPLE[R.doer], cName=PEOPLE[R.checker];
-    // Исполнитель
-    let t = doerTask(rid);
+  for(const [rid,Rm] of Object.entries(ROOMS)){
+    const dp=PEOPLE[Rm.doer], cp=PEOPLE[Rm.checker];
+    if(S.talk>0 && (qFrom(Rm.doer)||qFrom(Rm.checker))) S.talk=0;
+    if(S.talk>0){ if(inMeeting(Rm.doer)&&inMeeting(Rm.checker)) S.talk--; continue; }
+    let t=doerTask(rid);
     if(!t){
-      t = S.tasks.find(x=>x.room===rid && x.status==='queue');
-      if(t){ t.status='work'; t.progress=0; log(`${dName.name} ${dName.fem?'взяла':'взял'} задачу «${t.title}».`); }
-    } else if(!qFrom(R.doer)){
-      t.progress = Math.min(100, t.progress + rnd(3,7));
-      if(t.askDoer && !t.askedDoer && t.progress>=45){ t.askedDoer=true; makeQuestion(t, R.doer); }
-      else if(!t.talked && t.progress>=70){
-        t.talked=true; S.talk=3;
-        log(`${dName.name} советуется с ${cName.name==='Тимур'?'Тимуром':cName.name} по «${t.title}».`);
-      }
-      else if(t.progress>=100){ t.status='review'; t.progress=0; log(`${dName.name} ${dName.fem?'передала':'передал'} «${t.title}» на проверку.`); }
+      t=S.tasks.find(x=>x.room===rid&&x.status==='queue');
+      if(t){ t.status='work'; t.progress=0; log(`${dp.name} ${dp.fem?'взяла':'взял'} задачу «${t.title}».`); }
+    } else if(!qFrom(Rm.doer) && atDesk(Rm.doer)){
+      t.progress=Math.min(100,t.progress+rnd(3,7));
+      if(t.askDoer&&!t.askedDoer&&t.progress>=45){ t.askedDoer=true; makeQuestion(t,Rm.doer); }
+      else if(!t.talked&&t.progress>=70&&!qFrom(Rm.checker)){ t.talked=true; S.talk=5; S.talkProject=t.project; log(`${dp.name} позвала ${cp.name==='Тимур'?'Тимура':cp.name} в переговорку посоветоваться по «${t.title}».`); }
+      else if(t.progress>=100){ t.status='review'; t.progress=0; log(`${dp.name} ${dp.fem?'передала':'передал'} «${t.title}» на проверку.`); }
     }
-    // Проверяющий
-    const c = checkerTask(rid);
-    if(c && !qFrom(R.checker)){
-      c.progress = Math.min(100, c.progress + rnd(5,9));
+    const c=checkerTask(rid);
+    if(c&&!qFrom(Rm.checker)&&atDesk(Rm.checker)){
+      c.progress=Math.min(100,c.progress+rnd(5,9));
       if(c.progress>=100){
-        if(c.askCheck && !c.askedCheck){ c.askedCheck=true; makeQuestion(c, R.checker); }
-        else { c.status='done'; log(`${cName.name} проверил «${c.title}» — готово.`); }
+        if(c.askCheck&&!c.askedCheck){ c.askedCheck=true; makeQuestion(c,Rm.checker); }
+        else { c.status='done'; log(`${cp.name} проверил «${c.title}» — готово.`); }
       }
     }
   }
-  render(); save();
+  paint(); save();
 }
 
-/* ---------- Ответ на вопрос ---------- */
-function answer(qid, text){
-  text = String(text).trim(); if(!text) return;
-  const q = S.questions.find(x=>x.id===qid); if(!q) return;
-  S.questions = S.questions.filter(x=>x!==q);
-  const t = S.tasks.find(x=>x.id===q.taskId);
-  log(`Вы ответили ${PEOPLE[q.from].name==='Тимур'?'Тимуру':PEOPLE[q.from].name}: «${text}».`, true);
-  if(t){
-    t.answer = text;
-    if(t.status==='review'){ t.status='done'; log(`${PEOPLE[q.from].name} ${PEOPLE[q.from].fem?'закончила':'закончил'} «${t.title}» с вашим выбором — готово.`); }
+function answer(qid,text){
+  text=String(text).trim(); if(!text) return;
+  const q=S.questions.find(x=>x.id===qid); if(!q) return;
+  S.questions=S.questions.filter(x=>x!==q);
+  const t=S.tasks.find(x=>x.id===q.taskId), p=PEOPLE[q.from];
+  log(`Вы ответили ${p.dat}: «${text}».`,true);
+  if(t){ t.answer=text; if(t.status==='review'){ t.status='done'; log(`${p.name} ${p.fem?'закончила':'закончил'} «${t.title}» с вашим выбором — готово.`); } }
+  $('#modal').hidden=true;
+  paint(); save();
+}
+
+/* ================= Отрисовка состояния ================= */
+function placeFor(id){
+  if(id==='director') return 'seat';
+  for(const [rid,Rm] of Object.entries(ROOMS)){
+    if(id!==Rm.doer && id!==Rm.checker) continue;
+    if(qFrom(id)) return 'stand';
+    if(S.talk>0) return 'meet';
+    const has = id===Rm.doer ? doerTask(rid) : checkerTask(rid);
+    return has ? 'seat' : 'lounge';
   }
-  render(); save();
+  return 'seat';
+}
+function statusOf(id){
+  const p=PEOPLE[id], r=R[id];
+  if(id==='director') return S.questions.length?`Ждут вашего решения: ${S.questions.length}`:'Раздаёт задания';
+  if(qFrom(id)) return 'Ждёт вашего ответа';
+  if(r.walking) return r.place==='seat'||placeFor(id)==='seat' ? 'Идёт к столу' : 'Идёт';
+  if(r.place==='meet') return 'Советуется в переговорке';
+  if(r.place==='lounge') return p.fem?'Свободна, пьёт кофе':'Свободен, пьёт кофе';
+  for(const [rid,Rm] of Object.entries(ROOMS)) if(id===Rm.checker) return 'Проверяет';
+  return 'Работает';
+}
+function taskOf(id){
+  for(const [rid,Rm] of Object.entries(ROOMS)){
+    if(id===Rm.doer) return doerTask(rid);
+    if(id===Rm.checker) return checkerTask(rid) || (qFrom(id)&&S.tasks.find(t=>t.id===qFrom(id).taskId));
+  }
+  return null;
+}
+function setTag(id,pr,text){
+  const g=$('#tag-'+id); if(!g) return;
+  const pill=g.querySelector('.pill'), pt=g.querySelector('.pill-t'), tt=g.querySelector('.tag-t');
+  const label=pr?pr.short:'—'; const w=label.length*4.6+8;
+  pill.setAttribute('width',w); pill.setAttribute('fill',pr?pr.color:'#b9c2cb');
+  pt.textContent=label; tt.setAttribute('x', +pill.getAttribute('x')+w+5);
+  const desk=G.desks.find(d=>d.id===id); const room=Math.floor((desk.w-12-w-12)/4.9);
+  tt.textContent=cut(text, Math.max(6,room));
 }
 
-/* ---------- Отрисовка ---------- */
 let qKey='';
-function setStation(id, task, opts){
-  const el=$('#ws-'+id); if(!el) return;
-  const p=PEOPLE[id];
-  el.classList.toggle('stand', !!opts.stand);
-  el.classList.toggle('busy', !!opts.busy);
-  el.classList.toggle('talk', !!opts.talk);
-  el.classList.toggle('review', !!opts.review);
-  const pr = task ? proj(task.project) : null;
-  el.querySelector('.dot').style.background = pr ? pr.color : '#b9c2cb';
-  el.querySelector('.pn').textContent = opts.plateProj ?? (pr ? pr.name : 'Без проекта');
-  el.querySelector('.p-task').textContent = opts.plateTask ?? (task ? task.title : 'Свободен');
-  el.querySelector('.status').textContent = opts.status;
-  el.querySelector('.bar').hidden = opts.bar==null;
-  if(opts.bar!=null) el.querySelector('.bar i').style.width = opts.bar+'%';
-  const b=el.querySelector('.bubble');
-  b.className='bubble'+(opts.stand?' ask':'');
-  b.hidden=!opts.say;
-  b.textContent=opts.say||'';
-  b.onclick = opts.stand ? ()=>document.getElementById('q-'+qFrom(id).id)?.scrollIntoView({behavior:'smooth',block:'center'}) : null;
-}
+function paint(){
+  // перемещения
+  for(const id of Object.keys(PEOPLE)) goTo(id, placeFor(id));
+  // позы, пузыри, таблички
+  for(const id of Object.keys(PEOPLE)){
+    const el=$('#p-'+id), r=R[id], q=qFrom(id), t=taskOf(id);
+    if(!r.walking){
+      el.classList.toggle('asking', !!q && r.place==='stand');
+      el.classList.toggle('busy', r.place==='seat' && !!t && id!=='director');
+      let say='', kind='';
+      if(q && r.place==='stand'){ say='?'; kind='ask'; }
+      else if(r.place==='meet' && S.talk>0){ const tp=TALK[S.talkProject||'pipo']; const Rm=ROOMS.design; say = id===Rm.doer ? tp[0] : tp[1]; }
+      else if(id==='director' && S.dirSay>0) say='Передал в «Дизайн»';
+      setSay(el,say,kind);
+    }
+    if(id==='director'){ setTag(id,{short:'Все',color:'#f0a020'},'Раздаёт задания'); $('#nm-director').textContent='Рустам · директор'; }
+    else { const pr=t?proj(t.project):null; setTag(id,pr,t?t.title:'Нет задачи'); $('#nm-'+id).textContent=`${PEOPLE[id].name} · ${PEOPLE[id].role.toLowerCase()}`; }
+  }
+  // порядок по глубине
+  const front=$('#lay-front');
+  if(!Object.values(R).some(r=>r.walking)){
+    const cur=[...front.children], want=cur.slice().sort((a,b)=>R[a.id.slice(2)].y-R[b.id.slice(2)].y);
+    if(want.some((n,i)=>n!==cur[i])) want.forEach(n=>front.appendChild(n));
+  }
 
-function render(){
-  // проекты
-  $('#projects').innerHTML = PROJECTS.map(p=>{
-    const n=S.tasks.filter(t=>t.project===p.id && t.status!=='done').length;
-    return `<div class="proj"><span class="dot" style="background:${p.color}"></span>${esc(p.name)} <small>${n? 'в работе: '+n : 'нет задач'}</small></div>`;
+  // стена: экран, часы, доска
+  const done=S.tasks.filter(t=>t.status==='done').length, open=S.tasks.length-done;
+  const sd=$('#scrDone'); if(sd){ sd.textContent=`Готово: ${done}`; $('#scrWork').textContent=`В работе: ${open}`; }
+  const now=new Date(), cx=+$('#clkH')?.getAttribute('x1'), cy=38;
+  if(cx){ const ha=((now.getHours()%12)+now.getMinutes()/60)*30*Math.PI/180, ma=now.getMinutes()*6*Math.PI/180;
+    $('#clkH').setAttribute('x2',cx+7*Math.sin(ha)); $('#clkH').setAttribute('y2',cy-7*Math.cos(ha));
+    $('#clkM').setAttribute('x2',cx+11*Math.sin(ma)); $('#clkM').setAttribute('y2',cy-11*Math.cos(ma)); }
+  PROJECTS.forEach(p=>{ const el=$('#brd-'+p.id); if(el){ const n=S.tasks.filter(t=>t.project===p.id&&t.status!=='done').length; el.textContent=n?`в работе ${n}`:'—'; } });
+
+  // верхняя панель
+  const working=Object.keys(PEOPLE).filter(id=>id!=='director'&&R[id].place==='seat'&&taskOf(id)).length;
+  $('#cWork').textContent=working;
+  $('#cAskN').textContent=S.questions.length; $('#cAsk').classList.toggle('hot',S.questions.length>0);
+
+  // вопросы
+  const k=S.questions.map(q=>q.id).join(',');
+  if(k!==qKey){ qKey=k; $('#questions').innerHTML=S.questions.map(q=>qHTML(q,'l')).join(''); }
+
+  // список сотрудников
+  $('#staff').innerHTML=Object.keys(PEOPLE).map(id=>{
+    const p=PEOPLE[id], t=taskOf(id), pr=t?proj(t.project):null, st=statusOf(id);
+    return `<li data-id="${id}"><span class="ava" style="background:${p.look.top}">${esc(p.name[0])}</span>
+      <div><div class="s-top"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div>
+      <div class="s-task">${id==='director'?'Все проекты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t.title)}`:'Нет задачи'}</div>
+      <div class="s-st ${qFrom(id)?'wait':''}">${esc(st)}</div>
+      ${t&&id!=='director'?`<div class="bar"><i style="width:${t.progress}%"></i></div>`:''}</div></li>`;
   }).join('');
 
-  // директор
-  const open=S.tasks.filter(t=>t.status!=='done').length;
-  setStation('director', null, {
-    plateProj:'Все проекты', plateTask:'Раздаёт задания',
-    status: S.questions.length ? `Ждут вашего решения: ${S.questions.length}` : `Следит за задачами: ${open}`,
-    say: S.dirSay>0 ? 'Передал в «Дизайн»' : '', busy:false
-  });
-  $('#ws-director .dot').style.background='var(--ask)';
-
-  // комнаты
-  for(const [rid,R] of Object.entries(ROOMS)){
-    const t=doerTask(rid), c=checkerTask(rid), qd=qFrom(R.doer), qc=qFrom(R.checker), talking=S.talk>0;
-    const dp=PEOPLE[R.doer], cp=PEOPLE[R.checker];
-    setStation(R.doer, t, {
-      stand:!!qd, busy:!!t && !qd && !talking, talk:talking,
-      status: qd ? 'Ждёт вашего ответа' : talking ? 'Советуется с коллегой' : t ? 'Работает' : (dp.fem?'Свободна':'Свободен'),
-      say: qd ? '?' : talking ? 'Так понятнее?' : '',
-      bar: t ? t.progress : null,
-      plateTask: t ? t.title : (dp.fem?'Свободна':'Свободен')
-    });
-    setStation(R.checker, c, {
-      stand:!!qc, busy:!!c && !qc && !talking, talk:talking, review:true,
-      status: qc ? 'Ждёт вашего ответа' : talking ? 'Даёт совет' : c ? 'Проверяет' : 'Ждёт работу на проверку',
-      say: qc ? '?' : talking ? 'Да, кнопку крупнее' : '',
-      bar: c ? c.progress : null,
-      plateProj: c ? undefined : (t ? proj(t.project).name : 'Без проекта'),
-      plateTask: c ? c.title : 'Нечего проверять'
-    });
-  }
-
-  // вопросы (перерисовываем только при изменении, чтобы не стирать набранный текст)
-  const k=S.questions.map(q=>q.id).join(',');
-  if(k!==qKey){
-    qKey=k;
-    $('#questions').innerHTML = S.questions.map(q=>{
-      const t=S.tasks.find(x=>x.id===q.taskId), p=PEOPLE[q.from], pr=proj(t?t.project:'pipo');
-      return `<div class="q card" id="q-${q.id}">
-        <div class="q-head"><b>${esc(p.name)}</b> ${esc(p.role.toLowerCase())} · <span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t?t.title:'')}</div>
-        <p class="q-text">${esc(q.text)}</p>
-        <div class="q-opts">${q.options.map((o,i)=>`<button class="btn" type="button" data-q="${q.id}" data-i="${i}">${esc(o)}</button>`).join('')}</div>
-        <form class="q-own" data-q="${q.id}"><label class="sr" for="own-${q.id}" hidden>Свой ответ</label>
-          <input id="own-${q.id}" placeholder="Или напишите свой ответ" autocomplete="off"><button class="btn primary" type="submit">Ответить</button></form>
-      </div>`;
-    }).join('');
-  }
-  const ac=$('#askCount'); ac.hidden=!S.questions.length; ac.textContent=S.questions.length;
-
   // лента
-  $('#feed').innerHTML = S.feed.slice().reverse().map(f=>{
+  $('#feed').innerHTML=S.feed.slice().reverse().map(f=>{
     const d=new Date(f.t), hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     return `<li class="${f.me?'me':''}"><time>${hm}</time><span>${esc(f.text)}</span></li>`;
   }).join('');
-
-  if(!$('#modal').hidden) renderReport();
+  if(!$('#modal').hidden && sheetMode==='report') renderReport();
 }
 
+function qHTML(q,pre){
+  const t=S.tasks.find(x=>x.id===q.taskId), p=PEOPLE[q.from], pr=proj(t?t.project:'pipo');
+  return `<div class="q" id="${pre}-q-${q.id}">
+    <div class="q-head"><b>${esc(p.name)}</b> ${esc(p.role.toLowerCase())} · <span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t?t.title:'')}</div>
+    <p class="q-text">${esc(q.text)}</p>
+    <div class="q-opts">${q.options.map((o,i)=>`<button class="btn" type="button" data-q="${q.id}" data-i="${i}">${esc(o)}</button>`).join('')}</div>
+    <form class="q-own" data-q="${q.id}"><input id="${pre}-own-${q.id}" aria-label="Свой ответ" placeholder="Или напишите свой ответ" autocomplete="off"><button class="btn primary" type="submit">Ответить</button></form>
+  </div>`;
+}
+
+/* ================= Окна: сотрудник и отчёт ================= */
+let sheetMode='';
+function openPerson(id){
+  const p=PEOPLE[id], t=taskOf(id), pr=t?proj(t.project):null, q=qFrom(id);
+  sheetMode='person';
+  $('#sheetTitle').textContent=`${p.name} · ${p.role.toLowerCase()}`;
+  $('#sheetBody').innerHTML=`<dl class="facts">
+      <dt>Сейчас</dt><dd>${esc(statusOf(id))}</dd>
+      <dt>Проект</dt><dd>${id==='director'?'Все проекты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)}`:'—'}</dd>
+      <dt>Задача</dt><dd>${id==='director'?'Раздаёт задания и собирает отчёт':t?esc(t.title):'Нет задачи'}</dd>
+      ${t&&id!=='director'?`<dt>Готово</dt><dd>${t.progress}%</dd>`:''}
+    </dl>${q?qHTML(q,'s'):''}`;
+  $('#modal').hidden=false; $('#btnClose').focus();
+}
 function renderReport(){
   const done=S.tasks.filter(t=>t.status==='done'), work=S.tasks.filter(t=>t.status!=='done');
   const item=t=>{const p=proj(t.project);return `<span class="dot" style="background:${p.color}"></span>${esc(p.name)} — ${esc(t.title)}`};
   const stage=t=>({queue:'в очереди',work:'делается',review:'на проверке'}[t.status]);
-  $('#report').innerHTML = `
+  $('#sheetBody').innerHTML=`<div class="rep">
     <p class="summary">Готово: ${done.length}. В работе: ${work.length}. Ждёт вашего решения: ${S.questions.length}.</p>
     <h3>Ждёт вашего решения</h3>
-    <ul>${S.questions.map(q=>{const t=S.tasks.find(x=>x.id===q.taskId);return `<li>${t?item(t):''}: ${esc(q.text)} <button class="btn" type="button" data-goto="${q.id}">Ответить</button></li>`}).join('') || '<li class="none">Ничего</li>'}</ul>
+    <ul>${S.questions.map(q=>{const t=S.tasks.find(x=>x.id===q.taskId);return `<li>${t?item(t):''}: ${esc(q.text)} <button class="btn" type="button" data-goto="${q.from}">Ответить</button></li>`}).join('')||'<li class="none">Ничего</li>'}</ul>
     <h3>В работе</h3>
-    <ul>${work.map(t=>`<li>${item(t)} <small class="hint">· ${stage(t)}</small></li>`).join('') || '<li class="none">Ничего</li>'}</ul>
+    <ul>${work.map(t=>`<li>${item(t)} <small class="hint">· ${stage(t)}</small></li>`).join('')||'<li class="none">Ничего</li>'}</ul>
     <h3>Готово</h3>
-    <ul>${done.map(t=>`<li>${item(t)}${t.answer?` <small class="hint">· ваш выбор: ${esc(t.answer)}</small>`:''}</li>`).join('') || '<li class="none">Пока ничего</li>'}</ul>`;
+    <ul>${done.map(t=>`<li>${item(t)}${t.answer?` <small class="hint">· ваш выбор: ${esc(t.answer)}</small>`:''}</li>`).join('')||'<li class="none">Пока ничего</li>'}</ul></div>`;
 }
 
-/* ---------- Запуск ---------- */
-$('#dirStation').innerHTML = stationHTML('director');
-$('#st-design').innerHTML = stationHTML('malika') + stationHTML('timur');
-$('#taskProject').innerHTML = PROJECTS.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+/* ================= Запуск ================= */
+const mqTall=matchMedia('(max-width: 900px)');
+function setup(){
+  L = mqTall.matches ? LAYOUTS.tall : LAYOUTS.wide;
+  G = geometry();
+  buildScene();
+  for(const id of Object.keys(PEOPLE)){ R[id].walking=false; R[id].place=null; R[id].x=null; goTo(id, placeFor(id), true); }
+  $('#fbRooms').textContent = Object.keys(ROOMS).length===1 ? '1 комната' : Object.keys(ROOMS).length+' комнаты';
+  qKey='x'; paint();
+}
+mqTall.addEventListener('change', setup);
 
-$('#taskForm').addEventListener('submit', e=>{
+$('#taskProject').innerHTML=PROJECTS.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+$('#taskForm').addEventListener('submit',e=>{
   e.preventDefault();
   const title=$('#taskText').value.trim(); if(!title) return;
-  const t={id:++S.seq, title, project:$('#taskProject').value, room:$('#taskRoom').value, status:'queue', progress:0, askDoer:true, askCheck:false};
+  const t={id:++S.seq,title,project:$('#taskProject').value,room:$('#taskRoom').value,status:'queue',progress:0,askDoer:true,askCheck:false};
   S.tasks.push(t);
-  log(`Вы дали задание: «${title}» (${proj(t.project).name}).`, true);
+  log(`Вы дали задание: «${title}» (${proj(t.project).name}).`,true);
   log(`Директор передал «${title}» в комнату «${ROOMS[t.room].name}».`);
-  S.dirSay=3;
-  $('#taskText').value='';
-  render(); save();
+  S.dirSay=3; $('#taskText').value=''; paint(); save();
 });
-$('#questions').addEventListener('click', e=>{
-  const b=e.target.closest('button[data-i]'); if(!b) return;
-  const q=S.questions.find(x=>x.id==b.dataset.q); if(q) answer(q.id, q.options[b.dataset.i]);
-});
-$('#questions').addEventListener('submit', e=>{
-  e.preventDefault(); const f=e.target; answer(Number(f.dataset.q), f.querySelector('input').value);
-});
-$('#btnReport').onclick=()=>{ renderReport(); $('#modal').hidden=false; $('#btnClose').focus(); };
+function onAnswerClick(e){ const b=e.target.closest('button[data-i]'); if(!b) return; const q=S.questions.find(x=>x.id==b.dataset.q); if(q) answer(q.id,q.options[b.dataset.i]); }
+function onAnswerSubmit(e){ e.preventDefault(); const f=e.target; answer(Number(f.dataset.q), f.querySelector('input').value); }
+$('#questions').addEventListener('click',onAnswerClick);
+$('#questions').addEventListener('submit',onAnswerSubmit);
+$('#sheetBody').addEventListener('click',e=>{ onAnswerClick(e); const g=e.target.closest('[data-goto]'); if(g) openPerson(g.dataset.goto); });
+$('#sheetBody').addEventListener('submit',onAnswerSubmit);
+$('#staff').addEventListener('click',e=>{ const li=e.target.closest('li[data-id]'); if(li) openPerson(li.dataset.id); });
+$('#cAsk').onclick=()=>{ const f=S.questions[0]; if(f) openPerson(f.from); };
+$('#btnReport').onclick=()=>{ sheetMode='report'; $('#sheetTitle').textContent='Отчёт директора'; renderReport(); $('#modal').hidden=false; $('#btnClose').focus(); };
 $('#btnClose').onclick=()=>{ $('#modal').hidden=true; };
-$('#modal').addEventListener('click', e=>{
-  if(e.target.id==='modal') $('#modal').hidden=true;
-  const g=e.target.closest('[data-goto]');
-  if(g){ $('#modal').hidden=true; document.getElementById('q-'+g.dataset.goto)?.scrollIntoView({behavior:'smooth',block:'center'}); }
-});
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') $('#modal').hidden=true; });
-$('#btnReset').onclick=()=>{ S=seed(); qKey='x'; render(); save(); };
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') $('#modal').hidden=true; });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('#modal').hidden=true; });
+$('#btnReset').onclick=()=>{ S=seed(); save(); setup(); };
 
-render();
-setInterval(tick, 1500);
+setup();
+setInterval(tick,1500);
 
-if('serviceWorker' in navigator && location.protocol.startsWith('http')){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
