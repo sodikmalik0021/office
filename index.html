@@ -158,6 +158,16 @@ footer{text-align:center}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.92rem;margin:8px 0 12px}
 .facts dt{color:var(--muted)}.facts dd{margin:0}
 
+.login{position:fixed;inset:0;z-index:40;background:var(--frame);display:grid;place-items:center;overflow:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.login-card{width:min(380px,100%);padding:22px;display:grid;gap:12px}
+.login-card .brand{margin:0 0 4px}
+.login-card h1{font-size:1.35rem}
+.lg-fields{display:grid;gap:6px}
+.lg-fields label{font-size:.85rem;color:var(--muted);font-weight:600}
+.lg-fields input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px;font-size:16px;background:#fff}
+.lg-err{margin:0;color:#a3341f;font-size:.9rem}
+.net-err{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:35;background:#a3341f;color:#fff;padding:10px 14px;border-radius:10px;font-size:.9rem;max-width:calc(100% - 32px)}
 @media (max-width:900px){ .grid2{grid-template-columns:1fr} }
 @media (max-width:480px){ .floor{padding:5px;border-radius:12px} .floor-bar{font-size:.72rem} .floor-bar .tip,.chip.work{display:none} .chip{font-size:.78rem;padding:5px 9px} .top .btn{padding:0 12px} .demo{display:none} .top-in{gap:8px} }
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
@@ -204,8 +214,29 @@ footer{text-align:center}
       <section class="card pad feed"><h2>Что происходит</h2><ol id="feed"></ol></section>
     </div>
   </div>
-  <footer><button id="btnReset" class="link" type="button">Начать пример заново</button></footer>
+  <footer><button id="btnReset" class="link" type="button">Начать пример заново</button> · <button id="btnOut" class="link" type="button">Выйти</button></footer>
 </main>
+<div id="netErr" class="net-err" role="status" hidden></div>
+
+<div id="login" class="login" hidden>
+  <form id="loginForm" class="login-card card" novalidate>
+    <div class="brand"><span class="logo">О</span>Офис</div>
+    <h1 id="lgTitle">Вход</h1>
+    <div id="lgFields" class="lg-fields">
+      <label for="lgEmail">Почта</label>
+      <input id="lgEmail" type="email" inputmode="email" autocomplete="username" autocapitalize="off" required>
+      <label for="lgPass">Пароль</label>
+      <input id="lgPass" type="password" autocomplete="current-password" minlength="6" required>
+    </div>
+    <div id="inviteRow" class="lg-fields" hidden>
+      <label for="lgInvite">Код приглашения</label>
+      <input id="lgInvite" autocomplete="off" autocapitalize="characters" placeholder="6 знаков">
+    </div>
+    <p id="lgErr" class="lg-err" role="alert" hidden></p>
+    <button class="btn primary" type="submit" id="lgBtn">Войти</button>
+    <button class="link" type="button" id="lgSwitch">Первый раз? Создать аккаунт</button>
+  </form>
+</div>
 
 <div id="modal" class="modal" hidden>
   <div class="sheet card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
@@ -214,6 +245,7 @@ footer{text-align:center}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 /* ================= Справочники ================= */
 const PROJECTS = [
@@ -225,9 +257,9 @@ const ROOMS = { design:{name:'Дизайн', doer:'malika', checker:'timur'} };
 const PEOPLE = {
   director:{name:'Рустам', role:'Директор', fem:false, dat:'Рустаму',
     look:{skin:'#deb08a', hair:'#7c7c7c', style:'short', beard:true, top:'#2b3a4c', pants:'#2b3a4c', kind:'suit', accent:'#b5413a'}},
-  malika:{name:'Малика', role:'Делает', fem:true, dat:'Малике', ins:'Маликой',
+  malika:{name:'Малика', role:'Делает', fem:true, dat:'Малике', acc:'Малику',
     look:{skin:'#f0c6a3', hair:'#3a2416', style:'long', top:'#d9734f', pants:'#3f5578', kind:'sweater'}},
-  timur:{name:'Тимур', role:'Проверяет', fem:false, dat:'Тимуру', ins:'Тимуром',
+  timur:{name:'Тимур', role:'Проверяет', fem:false, dat:'Тимуру', acc:'Тимура',
     look:{skin:'#c58c62', hair:'#1e1a18', style:'short', top:'#3d7ea6', pants:'#2f3640', kind:'shirt', glasses:true}}
 };
 const proj = id => PROJECTS.find(p=>p.id===id) || PROJECTS[0];
@@ -273,30 +305,40 @@ function geometry(){
   return g;
 }
 
-/* ================= Состояние (позже переедет в общую базу) ================= */
-const KEY='office-demo-v2';
-function seed(){
-  const now=Date.now();
-  return {
-    seq:10, talk:0, dirSay:0,
-    tasks:[
-      {id:1, title:'Экран оплаты', project:'pipo', room:'design', status:'work', progress:38, askDoer:false, askCheck:false},
-      {id:2, title:'Обложка для рилса', project:'eslarma', room:'design', status:'review', progress:100, askCheck:true, askedCheck:true},
-      {id:3, title:'Иконка приложения', project:'kunlik', room:'design', status:'done', progress:100},
-      {id:4, title:'Цвета кнопок', project:'pipo', room:'design', status:'queue', progress:0, askDoer:false, askCheck:true}
-    ],
-    questions:[{id:5, taskId:2, from:'timur', text:'Какую обложку взять для рилса?', options:['Светлая, крупный текст','Тёмная, с фото']}],
-    feed:[
-      {t:now-60000*14, text:'Малика закончила «Иконка приложения», Тимур проверил — готово.'},
-      {t:now-60000*6, text:'Малика взяла задачу «Экран оплаты».'},
-      {t:now-60000*2, text:'Тимур встал: нужен ваш выбор по «Обложка для рилса».'}
-    ]
-  };
+/* ================= Общая база (Supabase): одно состояние на всех устройствах ================= */
+const SB_URL='https://akwwwlifaohkrtdnrekc.supabase.co';
+const SB_KEY='sb_publishable_B5Os-lN4DIr-boNf_4Jl6w_Ftvni6ji'; // открытый ключ: данные защищены входом владельца
+const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
+const CID = Math.random().toString(36).slice(2); // номер этого экрана
+let S = {tasks:[], questions:[], feed:[], talk:0, talkProject:null, dirSayUntil:0, demo:true};
+
+function applyState(o){ if(!o) return; S.talk=o.talk; S.talkProject=o.talk_project; S.dirSayUntil=o.dir_say_until?Date.parse(o.dir_say_until):0; S.demo=o.demo; }
+function upsertLocal(arr,row){ const i=arr.findIndex(x=>x.id===row.id); if(i<0) arr.push(row); else arr[i]=Object.assign(arr[i],row); }
+async function loadAll(){
+  const [t,q,e,o]=await Promise.all([
+    sb.from('tasks').select('*').order('id'),
+    sb.from('questions').select('*').is('answer',null).order('id'),
+    sb.from('events').select('*').order('created_at',{ascending:false}).limit(40),
+    sb.from('office_state').select('*').eq('id',1).maybeSingle()]);
+  for(const r of [t,q,e,o]) if(r.error) throw r.error;
+  S.tasks=t.data; S.questions=q.data; S.feed=e.data.reverse(); applyState(o.data);
+  qKey='x';
 }
-let S;
-try{ S=JSON.parse(localStorage.getItem(KEY)) }catch(e){}
-if(!S||!S.tasks) S=seed();
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+let channel=null;
+function subscribe(){
+  if(channel) sb.removeChannel(channel);
+  channel=sb.channel('office-'+CID).on('postgres_changes',{event:'*',schema:'public'},p=>{
+    const row=p.new, old=p.old, del=p.eventType==='DELETE';
+    if(p.table==='tasks'){ if(del) S.tasks=S.tasks.filter(x=>x.id!==old.id); else { upsertLocal(S.tasks,row); S.tasks.sort((a,b)=>a.id-b.id); } }
+    if(p.table==='questions'){ if(del||row.answer!=null) S.questions=S.questions.filter(x=>x.id!==(del?old.id:row.id)); else upsertLocal(S.questions,row); }
+    if(p.table==='events'){ if(p.eventType==='INSERT'){ if(!S.feed.some(f=>f.id===row.id)){ S.feed.push(row); if(S.feed.length>40) S.feed.shift(); } } else if(del) S.feed=S.feed.filter(f=>f.id!==old.id); }
+    if(p.table==='office_state' && row) applyState(row);
+    paint();
+  }).subscribe(st=>{ if(st==='SUBSCRIBED') loadAll().then(paint).catch(showErr); });
+}
+function showErr(e){ console.error(e); const n=$('#netErr'); if(n){ n.hidden=false; n.textContent='Нет связи с базой. Проверьте интернет — страница обновится сама.'; clearTimeout(showErr.t); showErr.t=setTimeout(()=>n.hidden=true,6000);} }
+async function patchTask(t,patch){ Object.assign(t,patch); const {error}=await sb.from('tasks').update(patch).eq('id',t.id); if(error) showErr(error); }
+async function setOffice(patch){ applyState(Object.assign({talk:S.talk,talk_project:S.talkProject,dir_say_until:S.dirSayUntil?new Date(S.dirSayUntil).toISOString():null,demo:S.demo},patch)); const {error}=await sb.from('office_state').update(patch).eq('id',1); if(error) showErr(error); }
 
 /* ================= Помощники ================= */
 const $=s=>document.querySelector(s);
@@ -305,7 +347,12 @@ const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const cut=(s,n)=>s.length>n? s.slice(0,n-1)+'…' : s;
 function shade(hex,k){const n=parseInt(hex.slice(1),16);const f=v=>Math.round(k<0?v*(1+k):v+(255-v)*k);
   return '#'+[n>>16,n>>8&255,n&255].map(v=>f(v).toString(16).padStart(2,'0')).join('');}
-function log(text,me){ S.feed.push({t:Date.now(),text,me:!!me}); if(S.feed.length>40) S.feed.shift(); }
+function log(text,me){
+  sb.from('events').insert({text,by_me:!!me}).select().single().then(({data,error})=>{
+    if(error) return showErr(error);
+    if(!S.feed.some(f=>f.id===data.id)){ S.feed.push(data); if(S.feed.length>40) S.feed.shift(); paint(); }
+  });
+}
 
 /* ================= Рисунок человечка (начало координат — ступни) ================= */
 function personSVG(id){
@@ -531,58 +578,73 @@ function setSay(el,text,kind){
 /* ================= Логика офиса (пример) ================= */
 const doerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='work');
 const checkerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='review');
-const qFrom=id=>S.questions.find(q=>q.from===id);
+const qFrom=id=>S.questions.find(q=>q.from_person===id);
 const atDesk=id=>R[id].place==='seat'&&!R[id].walking;
 const inMeeting=id=>R[id].place==='meet'&&!R[id].walking;
 
-function makeQuestion(task,from){
+async function makeQuestion(task,from){
   const P={pipo:['Какой цвет главной кнопки оставить?',['Зелёный, как сейчас','Синий, как логотип']],
     eslarma:['Какую обложку взять для рилса?',['Светлая, крупный текст','Тёмная, с фото']],
     kunlik:['Какой шрифт взять для заголовков?',['Строгий','Мягкий, округлый']]};
   let text,options;
   if(from===ROOMS[task.room].doer){ text=`Подготовила два варианта для «${task.title}». Какой берём?`; options=['Вариант A — проще','Вариант B — ярче']; }
-  else [text,options]=P[task.project];
-  S.questions.push({id:++S.seq,taskId:task.id,from,text,options});
+  else [text,options]=P[task.project]||P.pipo;
+  const {data,error}=await sb.from('questions').insert({task_id:task.id,from_person:from,text,options}).select().single();
+  if(error) return showErr(error);
+  if(!S.questions.some(q=>q.id===data.id)) S.questions.push(data);
   const p=PEOPLE[from]; log(`${p.name} ${p.fem?'встала':'встал'}: нужен ваш выбор по «${task.title}».`);
 }
 
-function tick(){
-  if(S.dirSay>0) S.dirSay--;
+/* Пример работы сотрудников. Ведёт его только один открытый экран, остальные просто показывают. */
+let ticking=false;
+async function tick(){
+  if(ticking||!ready) return; ticking=true;
+  try{
+    const {data:lead,error}=await sb.rpc('sim_heartbeat',{cid:CID});
+    if(error) throw error;
+    if(lead && S.demo) await simStep();
+  }catch(e){ showErr(e); }
+  finally{ ticking=false; paint(); }
+}
+async function simStep(){
   for(const [rid,Rm] of Object.entries(ROOMS)){
     const dp=PEOPLE[Rm.doer], cp=PEOPLE[Rm.checker];
-    if(S.talk>0 && (qFrom(Rm.doer)||qFrom(Rm.checker))) S.talk=0;
-    if(S.talk>0){ if(inMeeting(Rm.doer)&&inMeeting(Rm.checker)) S.talk--; continue; }
+    if(S.talk>0 && (qFrom(Rm.doer)||qFrom(Rm.checker))){ await setOffice({talk:0}); }
+    if(S.talk>0){ if(inMeeting(Rm.doer)&&inMeeting(Rm.checker)) await setOffice({talk:S.talk-1}); continue; }
     let t=doerTask(rid);
     if(!t){
       t=S.tasks.find(x=>x.room===rid&&x.status==='queue');
-      if(t){ t.status='work'; t.progress=0; log(`${dp.name} ${dp.fem?'взяла':'взял'} задачу «${t.title}».`); }
+      if(t){ await patchTask(t,{status:'work',progress:0}); log(`${dp.name} ${dp.fem?'взяла':'взял'} задачу «${t.title}».`); }
     } else if(!qFrom(Rm.doer) && atDesk(Rm.doer)){
-      t.progress=Math.min(100,t.progress+rnd(3,7));
-      if(t.askDoer&&!t.askedDoer&&t.progress>=45){ t.askedDoer=true; makeQuestion(t,Rm.doer); }
-      else if(!t.talked&&t.progress>=70&&!qFrom(Rm.checker)){ t.talked=true; S.talk=5; S.talkProject=t.project; log(`${dp.name} позвала ${cp.name==='Тимур'?'Тимура':cp.name} в переговорку посоветоваться по «${t.title}».`); }
-      else if(t.progress>=100){ t.status='review'; t.progress=0; log(`${dp.name} ${dp.fem?'передала':'передал'} «${t.title}» на проверку.`); }
+      const pr=Math.min(100,t.progress+rnd(4,9));
+      if(t.ask_doer&&!t.asked_doer&&pr>=45){ await patchTask(t,{progress:pr,asked_doer:true}); await makeQuestion(t,Rm.doer); }
+      else if(!t.talked&&pr>=70&&!qFrom(Rm.checker)){ await patchTask(t,{progress:pr,talked:true}); await setOffice({talk:4,talk_project:t.project}); log(`${dp.name} ${dp.fem?'позвала':'позвал'} ${cp.acc} в переговорку посоветоваться по «${t.title}».`); }
+      else if(pr>=100){ await patchTask(t,{status:'review',progress:0}); log(`${dp.name} ${dp.fem?'передала':'передал'} «${t.title}» на проверку.`); }
+      else await patchTask(t,{progress:pr});
     }
     const c=checkerTask(rid);
     if(c&&!qFrom(Rm.checker)&&atDesk(Rm.checker)){
-      c.progress=Math.min(100,c.progress+rnd(5,9));
-      if(c.progress>=100){
-        if(c.askCheck&&!c.askedCheck){ c.askedCheck=true; makeQuestion(c,Rm.checker); }
-        else { c.status='done'; log(`${cp.name} проверил «${c.title}» — готово.`); }
-      }
+      const pr=Math.min(100,c.progress+rnd(7,12));
+      if(pr>=100){
+        if(c.ask_check&&!c.asked_check){ await patchTask(c,{progress:100,asked_check:true}); await makeQuestion(c,Rm.checker); }
+        else { await patchTask(c,{progress:100,status:'done'}); log(`${cp.name} проверил «${c.title}» — готово.`); }
+      } else await patchTask(c,{progress:pr});
     }
   }
-  paint(); save();
 }
 
-function answer(qid,text){
+async function answer(qid,text){
   text=String(text).trim(); if(!text) return;
   const q=S.questions.find(x=>x.id===qid); if(!q) return;
   S.questions=S.questions.filter(x=>x!==q);
-  const t=S.tasks.find(x=>x.id===q.taskId), p=PEOPLE[q.from];
+  $('#modal').hidden=true; paint();
+  const {error}=await sb.from('questions').update({answer:text,answered_at:new Date().toISOString()}).eq('id',qid);
+  if(error){ S.questions.push(q); paint(); return showErr(error); }
+  const t=S.tasks.find(x=>x.id===q.task_id), p=PEOPLE[q.from_person];
   log(`Вы ответили ${p.dat}: «${text}».`,true);
-  if(t){ t.answer=text; if(t.status==='review'){ t.status='done'; log(`${p.name} ${p.fem?'закончила':'закончил'} «${t.title}» с вашим выбором — готово.`); } }
-  $('#modal').hidden=true;
-  paint(); save();
+  if(t){ const patch={answer:text}; if(t.status==='review') patch.status='done'; await patchTask(t,patch);
+    if(patch.status) log(`${p.name} ${p.fem?'закончила':'закончил'} «${t.title}» с вашим выбором — готово.`); }
+  paint();
 }
 
 /* ================= Отрисовка состояния ================= */
@@ -610,7 +672,7 @@ function statusOf(id){
 function taskOf(id){
   for(const [rid,Rm] of Object.entries(ROOMS)){
     if(id===Rm.doer) return doerTask(rid);
-    if(id===Rm.checker) return checkerTask(rid) || (qFrom(id)&&S.tasks.find(t=>t.id===qFrom(id).taskId));
+    if(id===Rm.checker) return checkerTask(rid) || (qFrom(id)&&S.tasks.find(t=>t.id===qFrom(id).task_id));
   }
   return null;
 }
@@ -637,7 +699,7 @@ function paint(){
       let say='', kind='';
       if(q && r.place==='stand'){ say='?'; kind='ask'; }
       else if(r.place==='meet' && S.talk>0){ const tp=TALK[S.talkProject||'pipo']; const Rm=ROOMS.design; say = id===Rm.doer ? tp[0] : tp[1]; }
-      else if(id==='director' && S.dirSay>0) say='Передал в «Дизайн»';
+      else if(id==='director' && Date.now()<S.dirSayUntil) say='Передал в «Дизайн»';
       setSay(el,say,kind);
     }
     if(id==='director'){ setTag(id,{short:'Все',color:'#f0a020'},'Раздаёт задания'); $('#nm-director').textContent='Рустам · директор'; }
@@ -680,14 +742,14 @@ function paint(){
 
   // лента
   $('#feed').innerHTML=S.feed.slice().reverse().map(f=>{
-    const d=new Date(f.t), hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    return `<li class="${f.me?'me':''}"><time>${hm}</time><span>${esc(f.text)}</span></li>`;
+    const d=new Date(f.created_at), hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    return `<li class="${f.by_me?'me':''}"><time>${hm}</time><span>${esc(f.text)}</span></li>`;
   }).join('');
   if(!$('#modal').hidden && sheetMode==='report') renderReport();
 }
 
 function qHTML(q,pre){
-  const t=S.tasks.find(x=>x.id===q.taskId), p=PEOPLE[q.from], pr=proj(t?t.project:'pipo');
+  const t=S.tasks.find(x=>x.id===q.task_id), p=PEOPLE[q.from_person], pr=proj(t?t.project:'pipo');
   return `<div class="q" id="${pre}-q-${q.id}">
     <div class="q-head"><b>${esc(p.name)}</b> ${esc(p.role.toLowerCase())} · <span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t?t.title:'')}</div>
     <p class="q-text">${esc(q.text)}</p>
@@ -717,7 +779,7 @@ function renderReport(){
   $('#sheetBody').innerHTML=`<div class="rep">
     <p class="summary">Готово: ${done.length}. В работе: ${work.length}. Ждёт вашего решения: ${S.questions.length}.</p>
     <h3>Ждёт вашего решения</h3>
-    <ul>${S.questions.map(q=>{const t=S.tasks.find(x=>x.id===q.taskId);return `<li>${t?item(t):''}: ${esc(q.text)} <button class="btn" type="button" data-goto="${q.from}">Ответить</button></li>`}).join('')||'<li class="none">Ничего</li>'}</ul>
+    <ul>${S.questions.map(q=>{const t=S.tasks.find(x=>x.id===q.task_id);return `<li>${t?item(t):''}: ${esc(q.text)} <button class="btn" type="button" data-goto="${q.from_person}">Ответить</button></li>`}).join('')||'<li class="none">Ничего</li>'}</ul>
     <h3>В работе</h3>
     <ul>${work.map(t=>`<li>${item(t)} <small class="hint">· ${stage(t)}</small></li>`).join('')||'<li class="none">Ничего</li>'}</ul>
     <h3>Готово</h3>
@@ -737,14 +799,20 @@ function setup(){
 mqTall.addEventListener('change', setup);
 
 $('#taskProject').innerHTML=PROJECTS.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
-$('#taskForm').addEventListener('submit',e=>{
+$('#taskForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const title=$('#taskText').value.trim(); if(!title) return;
-  const t={id:++S.seq,title,project:$('#taskProject').value,room:$('#taskRoom').value,status:'queue',progress:0,askDoer:true,askCheck:false};
-  S.tasks.push(t);
-  log(`Вы дали задание: «${title}» (${proj(t.project).name}).`,true);
-  log(`Директор передал «${title}» в комнату «${ROOMS[t.room].name}».`);
-  S.dirSay=3; $('#taskText').value=''; paint(); save();
+  const btn=e.submitter; if(btn) btn.disabled=true;
+  const row={title,project:$('#taskProject').value,room:$('#taskRoom').value,status:'queue',progress:0,ask_doer:true,ask_check:false};
+  const {data,error}=await sb.from('tasks').insert(row).select().single();
+  if(btn) btn.disabled=false;
+  if(error) return showErr(error);
+  if(!S.tasks.some(t=>t.id===data.id)) S.tasks.push(data);
+  $('#taskText').value='';
+  log(`Вы дали задание: «${title}» (${proj(data.project).name}).`,true);
+  log(`Директор передал «${title}» в комнату «${ROOMS[data.room].name}».`);
+  setOffice({dir_say_until:new Date(Date.now()+6000).toISOString()});
+  paint();
 });
 function onAnswerClick(e){ const b=e.target.closest('button[data-i]'); if(!b) return; const q=S.questions.find(x=>x.id==b.dataset.q); if(q) answer(q.id,q.options[b.dataset.i]); }
 function onAnswerSubmit(e){ e.preventDefault(); const f=e.target; answer(Number(f.dataset.q), f.querySelector('input').value); }
@@ -753,15 +821,69 @@ $('#questions').addEventListener('submit',onAnswerSubmit);
 $('#sheetBody').addEventListener('click',e=>{ onAnswerClick(e); const g=e.target.closest('[data-goto]'); if(g) openPerson(g.dataset.goto); });
 $('#sheetBody').addEventListener('submit',onAnswerSubmit);
 $('#staff').addEventListener('click',e=>{ const li=e.target.closest('li[data-id]'); if(li) openPerson(li.dataset.id); });
-$('#cAsk').onclick=()=>{ const f=S.questions[0]; if(f) openPerson(f.from); };
+$('#cAsk').onclick=()=>{ const f=S.questions[0]; if(f) openPerson(f.from_person); };
 $('#btnReport').onclick=()=>{ sheetMode='report'; $('#sheetTitle').textContent='Отчёт директора'; renderReport(); $('#modal').hidden=false; $('#btnClose').focus(); };
 $('#btnClose').onclick=()=>{ $('#modal').hidden=true; };
 $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') $('#modal').hidden=true; });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') $('#modal').hidden=true; });
-$('#btnReset').onclick=()=>{ S=seed(); save(); setup(); };
+$('#btnReset').onclick=async()=>{ const {error}=await sb.rpc('reset_demo'); if(error) return showErr(error); await loadAll(); setup(); };
+$('#btnOut').onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+
+/* ================= Вход ================= */
+let ready=false, mode='in';
+const ERR={'Invalid login credentials':'Неверная почта или пароль.','User already registered':'Такой аккаунт уже есть. Нажмите «Уже есть аккаунт? Войти».',
+  'Email not confirmed':'Почта не подтверждена. Откройте письмо от Supabase.'};
+function lgMsg(t){ const e=$('#lgErr'); e.hidden=!t; e.textContent=t||''; }
+function setMode(m){
+  mode=m;
+  $('#lgTitle').textContent = m==='up'?'Создать аккаунт': m==='claim'?'Код приглашения':'Вход';
+  $('#lgFields').hidden = m==='claim';
+  $('#inviteRow').hidden = m==='in';
+  $('#lgBtn').textContent = m==='up'?'Создать и войти': m==='claim'?'Подтвердить':'Войти';
+  $('#lgSwitch').hidden = m==='claim';
+  $('#lgSwitch').textContent = m==='up'?'Уже есть аккаунт? Войти':'Первый раз? Создать аккаунт';
+  $('#lgPass').autocomplete = m==='up'?'new-password':'current-password';
+  $('#lgEmail').required=$('#lgPass').required = m!=='claim';
+  lgMsg('');
+}
+function showLogin(m){ $('#login').hidden=false; setMode(m||'in'); }
+$('#lgSwitch').onclick=()=>setMode(mode==='up'?'in':'up');
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault(); lgMsg(''); const btn=$('#lgBtn'); btn.disabled=true;
+  try{
+    const email=$('#lgEmail').value.trim(), password=$('#lgPass').value, invite=$('#lgInvite').value;
+    if(mode==='up'){
+      const {data,error}=await sb.auth.signUp({email,password});
+      if(error) return lgMsg(ERR[error.message]||('Не получилось: '+error.message));
+      if(!data.session) return lgMsg('Мы отправили письмо на вашу почту. Откройте его, подтвердите и войдите.');
+    } else if(mode==='in'){
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error) return lgMsg(ERR[error.message]||('Не получилось: '+error.message));
+    }
+    if(mode!=='in'){
+      const {data:ok,error}=await sb.rpc('claim_owner',{invite});
+      if(error) return lgMsg('Не получилось: '+error.message);
+      if(!ok) return lgMsg('Код не подошёл. Проверьте его или спросите у Claude.');
+    }
+    await startApp();
+  } finally { btn.disabled=false; }
+});
+
+async function startApp(){
+  const {data:own,error}=await sb.rpc('is_owner');
+  if(error){ showLogin('in'); return lgMsg('Нет связи с базой. Проверьте интернет.'); }
+  if(!own){ showLogin('claim'); return lgMsg('Этот вход ещё не привязан к офису. Введите код приглашения.'); }
+  $('#login').hidden=true;
+  try{ await loadAll(); }catch(e){ showErr(e); }
+  ready=true; setup(); subscribe();
+}
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden && ready) loadAll().then(paint).catch(showErr); });
 
 setup();
-setInterval(tick,1500);
+setInterval(tick,2500);
+setInterval(()=>{ if(ready) paint(); },1000);
+if(!sb){ showLogin('in'); lgMsg('Не загрузилась связь с базой. Проверьте интернет и обновите страницу.'); }
+else sb.auth.getSession().then(({data})=>{ if(data.session) startApp(); else showLogin('in'); });
 
 if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
