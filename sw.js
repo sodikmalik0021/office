@@ -1,6 +1,6 @@
 // Офис: запоминает страницу, чтобы приложение открывалось быстро.
 // Сначала берёт свежую версию из интернета, без сети — сохранённую.
-const CACHE = 'office-v3';
+const CACHE = 'office-v4';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

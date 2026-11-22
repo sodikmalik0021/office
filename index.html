@@ -185,7 +185,7 @@ footer{text-align:center}
 
 <main class="wrap">
   <section class="floor" aria-label="Этаж офиса">
-    <div class="floor-bar"><span>Этаж 1 · <b id="fbRooms">1 комната</b></span><span class="tip">Нажмите на сотрудника, чтобы открыть его стол</span></div>
+    <div class="floor-bar"><span>Этаж 1 · <b id="fbRooms">1 комната</b></span><span class="tip">Офис работает круглосуточно, даже когда экран закрыт</span></div>
     <svg id="scene" role="img" aria-label="Офис, вид сверху"></svg>
   </section>
 
@@ -206,7 +206,7 @@ footer{text-align:center}
           <div class="row">
             <div><label for="taskProject">Проект</label><select id="taskProject"></select></div>
             <div><label for="taskRoom">Комната</label>
-              <select id="taskRoom"><option value="design">Дизайн</option><option disabled>Система — скоро</option></select></div>
+              <select id="taskRoom"><option value="auto">Пусть решит директор</option><option value="design">Дизайн</option><option value="system">Система</option><option value="content">Контент</option><option value="analytics">Аналитика</option></select></div>
           </div>
           <button class="btn primary" type="submit">Отдать директору</button>
         </form>
@@ -214,7 +214,7 @@ footer{text-align:center}
       <section class="card pad feed"><h2>Что происходит</h2><ol id="feed"></ol></section>
     </div>
   </div>
-  <footer><button id="btnReset" class="link" type="button">Начать пример заново</button> · <button id="btnOut" class="link" type="button">Выйти</button></footer>
+  <footer><button id="btnReset" class="link" type="button">Начать заново</button> · <button id="btnOut" class="link" type="button">Выйти</button></footer>
 </main>
 <div id="netErr" class="net-err" role="status" hidden></div>
 
@@ -253,31 +253,45 @@ const PROJECTS = [
   {id:'eslarma', name:'Instagram (eslarma.uz)', short:'eslarma', color:'#d9467a'},
   {id:'kunlik',  name:'«Кунлик вирд»',          short:'Кунлик',  color:'#2e9e6a'}
 ];
-const ROOMS = { design:{name:'Дизайн', doer:'malika', checker:'timur'} };
+/* Комнаты: в каждой один делает, второй проверяет. Работой управляет сервер (Supabase, каждые 5 секунд, круглосуточно). */
+const ROOMS = {
+  design:   {name:'Дизайн',    sub:'рисует · проверяет',          doer:'malika',  checker:'timur',  idle:'Собирает референсы', talk:['Кнопка заметна?','Да, только крупнее']},
+  system:   {name:'Система',   sub:'пишет код · тестирует',       doer:'aziz',    checker:'nigora', idle:'Пишет тесты',        talk:['Тут может упасть?','Добавлю проверку']},
+  content:  {name:'Контент',   sub:'пишет тексты · редактирует',  doer:'dilnoza', checker:'bobur',  idle:'Читает комментарии', talk:['Первая фраза цепляет?','Да, только короче']},
+  analytics:{name:'Аналитика', sub:'считает · сверяет цифры',     doer:'shahzod', checker:'kamila', idle:'Собирает данные',    talk:['Цифры сходятся?','Да, сверила с отчётом']}
+};
 const PEOPLE = {
   director:{name:'Рустам', role:'Директор', fem:false, dat:'Рустаму',
     look:{skin:'#deb08a', hair:'#7c7c7c', style:'short', beard:true, top:'#2b3a4c', pants:'#2b3a4c', kind:'suit', accent:'#b5413a'}},
-  malika:{name:'Малика', role:'Делает', fem:true, dat:'Малике', acc:'Малику',
+  malika:{name:'Малика', role:'Дизайнер', fem:true, dat:'Малике',
     look:{skin:'#f0c6a3', hair:'#3a2416', style:'long', top:'#d9734f', pants:'#3f5578', kind:'sweater'}},
-  timur:{name:'Тимур', role:'Проверяет', fem:false, dat:'Тимуру', acc:'Тимура',
-    look:{skin:'#c58c62', hair:'#1e1a18', style:'short', top:'#3d7ea6', pants:'#2f3640', kind:'shirt', glasses:true}}
+  timur:{name:'Тимур', role:'Проверяет дизайн', fem:false, dat:'Тимуру',
+    look:{skin:'#c58c62', hair:'#1e1a18', style:'short', top:'#3d7ea6', pants:'#2f3640', kind:'shirt', glasses:true}},
+  aziz:{name:'Азиз', role:'Программист', fem:false, dat:'Азизу',
+    look:{skin:'#d9a37c', hair:'#14110f', style:'short', top:'#3f6e4f', pants:'#2b2f36', kind:'sweater'}},
+  nigora:{name:'Нигора', role:'Тестировщик', fem:true, dat:'Нигоре',
+    look:{skin:'#eac0a0', hair:'#2a1a12', style:'long', top:'#8a5fb8', pants:'#3a3f4a', kind:'shirt', glasses:true}},
+  dilnoza:{name:'Дилноза', role:'Автор текстов', fem:true, dat:'Дилнозе',
+    look:{skin:'#f2cfb0', hair:'#4a2a18', style:'long', top:'#e0a43a', pants:'#3f5578', kind:'sweater'}},
+  bobur:{name:'Бобур', role:'Редактор', fem:false, dat:'Бобуру',
+    look:{skin:'#c99068', hair:'#2b211c', style:'short', beard:true, top:'#5a6b7c', pants:'#2f3640', kind:'shirt'}},
+  shahzod:{name:'Шахзод', role:'Аналитик', fem:false, dat:'Шахзоду',
+    look:{skin:'#e0b48e', hair:'#1b1613', style:'short', top:'#2f8f8a', pants:'#2b3a4c', kind:'shirt', glasses:true}},
+  kamila:{name:'Камила', role:'Проверяет цифры', fem:true, dat:'Камиле',
+    look:{skin:'#e8bb96', hair:'#1c120d', style:'long', top:'#c94f6d', pants:'#2f3640', kind:'sweater'}}
 };
 const proj = id => PROJECTS.find(p=>p.id===id) || PROJECTS[0];
-const TALK = {
-  pipo:['Кнопка «Оплатить» заметна?','Да, только крупнее'],
-  eslarma:['Текст на обложке читается?','Читается, чуть контраста'],
-  kunlik:['Иконка понятна сразу?','Да, упрости детали']
-};
+const roomOf = id => Object.keys(ROOMS).find(r=>ROOMS[r].doer===id||ROOMS[r].checker===id);
 
 /* ================= Планировка этажа ================= */
 const LAYOUTS = {
   wide:{W:1000,H:600, gaps:[328],
     zones:{director:{x:20,y:92,w:290,h:228}, design:{x:326,y:92,w:340,h:228}, meeting:{x:682,y:92,w:298,h:228},
-           board:{x:20,y:336,w:290,h:248}, system:{x:326,y:336,w:340,h:248}, lounge:{x:682,y:336,w:298,h:248}},
+           content:{x:20,y:336,w:290,h:248}, system:{x:326,y:336,w:340,h:248}, analytics:{x:682,y:336,w:298,h:248}},
     wall:[['win',30,130],['win',176,130],['pic',330,34],['scr',392,150],['clock',580],['win',630,130],['win',776,130],['plant',934]]},
-  tall:{W:560,H:1000, gaps:[320,566,772],
+  tall:{W:560,H:1312, gaps:[320,566,812,1058],
     zones:{director:{x:16,y:92,w:256,h:220}, meeting:{x:288,y:92,w:256,h:220}, design:{x:16,y:328,w:528,h:230},
-           system:{x:16,y:574,w:528,h:190}, lounge:{x:16,y:780,w:528,h:204}},
+           system:{x:16,y:574,w:528,h:230}, content:{x:16,y:820,w:528,h:230}, analytics:{x:16,y:1066,w:528,h:230}},
     wall:[['win',18,112],['win',140,112],['scr',268,140],['clock',438],['pic',470,34],['plant',528]]}
 };
 let L, G; // текущая планировка и рассчитанные места
@@ -286,19 +300,18 @@ function geometry(){
   const Z=L.zones, g={desks:[], spots:{}};
   const dz=Z.director, dcx=dz.x+dz.w/2, dd0=dz.y+100;
   g.desks.push({id:'director', cx:dcx, d0:dd0, w:140});
-  g.spots.director={seat:{x:dcx,y:dd0+12,zone:'director'}};
+  g.spots.director={seat:{x:dcx,y:dd0+12,zone:'director'}, stand:{x:dcx+86,y:dd0+62,zone:'director'}};
+  const m=Z.meeting, mx=m.x+m.w/2, my=m.y+m.h/2+30;
   for(const [rid,R] of Object.entries(ROOMS)){
-    const z=Z[rid], cx=z.x+z.w/2, d0=z.y+100, off=Math.min(82, z.w/4);
+    const z=Z[rid], cx=z.x+z.w/2, d0=z.y+100, off=Math.min(82, z.w/4), dw=z.w<320?106:118;
+    g.spots.director['visit_'+rid]={x:cx, y:d0+86, zone:rid};
     [R.doer,R.checker].forEach((id,i)=>{
       const x=cx+(i?off:-off), side=i?1:-1;
-      g.desks.push({id, cx:x, d0, w:118});
-      const m=Z.meeting, mx=m.x+m.w/2, my=m.y+m.h/2+30;
-      const lz=Z.lounge;
+      g.desks.push({id, cx:x, d0, w:dw});
       g.spots[id]={
         seat:{x, y:d0+12, zone:rid},
-        stand:{x:x+side*76, y:d0+62, zone:rid},
-        meet:{x:mx+side*84, y:my+12, zone:'meeting'},
-        lounge:{x:lz.x+62+i*48, y:lz.y+124, zone:'lounge'}
+        stand:{x:x+side*(dw/2+16), y:d0+62, zone:rid},
+        meet:{x:mx+side*84, y:my+12, zone:'meeting'}
       };
     });
   }
@@ -310,9 +323,10 @@ const SB_URL='https://akwwwlifaohkrtdnrekc.supabase.co';
 const SB_KEY='sb_publishable_B5Os-lN4DIr-boNf_4Jl6w_Ftvni6ji'; // открытый ключ: данные защищены входом владельца
 const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true}}) : null;
 const CID = Math.random().toString(36).slice(2); // номер этого экрана
-let S = {tasks:[], questions:[], feed:[], talk:0, talkProject:null, dirSayUntil:0, demo:true};
+let S = {tasks:[], questions:[], feed:[], talk:0, talkRoom:null, dirSayUntil:0, dirNote:'', dirVisit:null, demo:true};
 
-function applyState(o){ if(!o) return; S.talk=o.talk; S.talkProject=o.talk_project; S.dirSayUntil=o.dir_say_until?Date.parse(o.dir_say_until):0; S.demo=o.demo; }
+function applyState(o){ if(!o) return; S.talk=o.talk; S.talkRoom=o.talk_room; S.dirSayUntil=o.dir_say_until?Date.parse(o.dir_say_until):0;
+  S.dirNote=o.dir_note||''; S.dirVisit=o.dir_visit&&ROOMS[o.dir_visit]?o.dir_visit:null; S.demo=o.demo; }
 function upsertLocal(arr,row){ const i=arr.findIndex(x=>x.id===row.id); if(i<0) arr.push(row); else arr[i]=Object.assign(arr[i],row); }
 async function loadAll(){
   const [t,q,e,o]=await Promise.all([
@@ -338,7 +352,6 @@ function subscribe(){
 }
 function showErr(e){ console.error(e); const n=$('#netErr'); if(n){ n.hidden=false; n.textContent='Нет связи с базой. Проверьте интернет — страница обновится сама.'; clearTimeout(showErr.t); showErr.t=setTimeout(()=>n.hidden=true,6000);} }
 async function patchTask(t,patch){ Object.assign(t,patch); const {error}=await sb.from('tasks').update(patch).eq('id',t.id); if(error) showErr(error); }
-async function setOffice(patch){ applyState(Object.assign({talk:S.talk,talk_project:S.talkProject,dir_say_until:S.dirSayUntil?new Date(S.dirSayUntil).toISOString():null,demo:S.demo},patch)); const {error}=await sb.from('office_state').update(patch).eq('id',1); if(error) showErr(error); }
 
 /* ================= Помощники ================= */
 const $=s=>document.querySelector(s);
@@ -462,7 +475,8 @@ function buildScene(){
   const dz=Z.director;
   s+=glassRoom(dz,'КАБИНЕТ ДИРЕКТОРА');
   s+=`<ellipse cx="${dz.x+dz.w/2}" cy="${dz.y+128}" rx="${Math.min(110,dz.w/2-14)}" ry="44" fill="#d9cdb8" opacity=".55"/>
-      <rect x="${dz.x+14}" y="${dz.y+40}" width="44" height="46" rx="2" fill="#7a5a3d"/><rect x="${dz.x+18}" y="${dz.y+46}" width="36" height="16" fill="#e8dcc5"/><rect x="${dz.x+18}" y="${dz.y+66}" width="36" height="16" fill="#c9b79a"/>
+      <rect x="${dz.x+12}" y="${dz.y+36}" width="96" height="50" rx="3" fill="#fff" stroke="#c8ced5" stroke-width="2"/>
+      ${PROJECTS.map((p,i)=>`<circle cx="${dz.x+21}" cy="${dz.y+47+i*13}" r="3.2" fill="${p.color}"/><text class="brd-t" style="font-size:7.6px" x="${dz.x+28}" y="${dz.y+50+i*13}">${esc(p.short)}</text><text class="brd-n" style="font-size:7.6px" id="brd-${p.id}" x="${dz.x+103}" y="${dz.y+50+i*13}" text-anchor="end"></text>`).join('')}
       ${plant(dz.x+dz.w-26,dz.y+90,1.1)}`;
 
   // Переговорка
@@ -479,39 +493,9 @@ function buildScene(){
   for(const [rid,R] of Object.entries(ROOMS)){
     const z=Z[rid];
     s+=`<rect x="${z.x}" y="${z.y}" width="${z.w}" height="${z.h}" rx="10" fill="#dfe8e3" opacity=".7"/>
-      <text class="zl" x="${z.x+12}" y="${z.y+18}">${R.name.toUpperCase()}</text><text class="zs" x="${z.x+12}" y="${z.y+30}">один делает · второй проверяет</text>
+      <text class="zl" x="${z.x+12}" y="${z.y+18}">${R.name.toUpperCase()}</text><text class="zs" x="${z.x+12}" y="${z.y+30}">${R.sub}</text>
       ${plant(z.x+z.w-22,z.y+56,.9)}`;
   }
-  // Будущая комната
-  const sz=Z.system;
-  s+=`<rect x="${sz.x+2}" y="${sz.y+2}" width="${sz.w-4}" height="${sz.h-4}" rx="10" fill="none" stroke="#b9c2cb" stroke-width="2" stroke-dasharray="8 6"/>
-    <text x="${sz.x+sz.w/2}" y="${sz.y+sz.h/2-4}" text-anchor="middle" style="font-weight:700;font-size:13px;fill:#7d8792">Комната «Система»</text>
-    <text x="${sz.x+sz.w/2}" y="${sz.y+sz.h/2+13}" text-anchor="middle" class="zs">появится позже — этаж вырастет сам</text>`;
-  [-1,1].forEach(k=>{ s+=`<rect x="${sz.x+sz.w/2+k*80-50}" y="${sz.y+sz.h/2+30}" width="100" height="30" rx="3" fill="none" stroke="#c9d0d7" stroke-dasharray="4 4"/>`; });
-
-  // Доска проектов (только на широком экране)
-  if(Z.board){
-    const b=Z.board;
-    s+=`<text class="zl" x="${b.x+12}" y="${b.y+18}">ДОСКА ПРОЕКТОВ</text>
-      <rect x="${b.x+24}" y="${b.y+34}" width="${b.w-48}" height="${30+PROJECTS.length*24}" rx="4" fill="#fff" stroke="#c8ced5" stroke-width="2"/>
-      ${PROJECTS.map((p,i)=>`<circle cx="${b.x+42}" cy="${b.y+56+i*24}" r="4.5" fill="${p.color}"/><text class="brd-t" x="${b.x+54}" y="${b.y+59+i*24}">${esc(p.name)}</text><text class="brd-n" id="brd-${p.id}" x="${b.x+b.w-36}" y="${b.y+59+i*24}" text-anchor="end"></text>`).join('')}
-      <path d="M${b.x+60} ${b.y+34+30+PROJECTS.length*24} l-8 40 M${b.x+b.w-60} ${b.y+34+30+PROJECTS.length*24} l8 40" stroke="#8a929b" stroke-width="3"/>
-      ${plant(b.x+30,b.y+b.h-14,1)}${plant(b.x+b.w-30,b.y+b.h-14,1.2)}`;
-  }
-
-  // Кофе-поинт
-  const lz=Z.lounge;
-  s+=`<text class="zl" x="${lz.x+12}" y="${lz.y+18}">КОФЕ И ОТДЫХ</text>
-    <rect x="${lz.x+24}" y="${lz.y+44}" width="150" height="20" fill="#e4ddd2"/><rect x="${lz.x+24}" y="${lz.y+64}" width="150" height="26" fill="#9aa4ae"/>
-    <rect x="${lz.x+36}" y="${lz.y+26}" width="22" height="26" rx="3" fill="#2a3036"/><rect x="${lz.x+42}" y="${lz.y+38}" width="10" height="8" fill="#5c6670"/>
-    <rect x="${lz.x+70}" y="${lz.y+46}" width="6" height="7" rx="1" fill="#fff" stroke="#c9ced6" stroke-width=".7"/><rect x="${lz.x+80}" y="${lz.y+46}" width="6" height="7" rx="1" fill="#fff" stroke="#c9ced6" stroke-width=".7"/>
-    <ellipse cx="${lz.x+lz.w-95}" cy="${lz.y+lz.h-58}" rx="80" ry="34" fill="#c9b79a" opacity=".55"/>
-    <rect x="${lz.x+lz.w-160}" y="${lz.y+lz.h-104}" width="130" height="22" rx="6" fill="#5b6b7a"/>
-    <rect x="${lz.x+lz.w-164}" y="${lz.y+lz.h-84}" width="138" height="18" rx="5" fill="#6d7e8e"/>
-    <rect x="${lz.x+lz.w-168}" y="${lz.y+lz.h-100}" width="12" height="36" rx="5" fill="#53626f"/><rect x="${lz.x+lz.w-38}" y="${lz.y+lz.h-100}" width="12" height="36" rx="5" fill="#53626f"/>
-    <rect x="${lz.x+lz.w-130}" y="${lz.y+lz.h-52}" width="70" height="16" rx="3" fill="#8a6a4a"/>
-    ${plant(lz.x+lz.w-14-6,lz.y+lz.h-110,1.2)}
-    <path d="M${lz.x+lz.w-190} ${lz.y+lz.h-30} v-60" stroke="#444" stroke-width="2"/><circle cx="${lz.x+lz.w-190}" cy="${lz.y+lz.h-94}" r="8" fill="#fff4cf" stroke="#d9c88f"/>`;
 
   s+=`<g id="lay-behind"></g><g id="lay-desks">${G.desks.map(deskSVG).join('')}</g><g id="lay-front"></g>`;
   const svg=$('#scene');
@@ -542,7 +526,7 @@ function goTo(id,place,instant){
   const r=R[id]; if(r.walking) return;
   if(r.place===place && !instant) return;
   const sp=G.spots[id][place], el=$('#p-'+id);
-  const pose = place==='seat'?'sitf' : place==='lounge'?'cup' : 'stand';
+  const pose = place==='seat'?'sitf' : 'stand';
   const finish=()=>{ r.place=place; setPose(el,pose); toLayer(el, place==='seat'?'behind':'front'); paint(); };
   if(instant || r.x==null || reduceMotion){ el.style.transform=tr(sp.x,sp.y); r.x=sp.x; r.y=sp.y; finish(); return; }
   const st=G.spots[id].stand, pts=[[r.x,r.y]];
@@ -575,64 +559,11 @@ function setSay(el,text,kind){
   g.innerHTML=`<rect x="${-w/2}" y="-11" width="${w}" height="17" rx="8" fill="#fff" stroke="#cfd6dd"/><path d="M-3 6 L0 10 L3 6 Z" fill="#fff"/><text y="1" text-anchor="middle" style="font-size:8.5px;fill:#1b2530">${esc(text)}</text>`;
 }
 
-/* ================= Логика офиса (пример) ================= */
+/* ================= Логика офиса: всё решает сервер, экран только показывает ================= */
 const doerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='work');
 const checkerTask=room=>S.tasks.find(t=>t.room===room&&t.status==='review');
 const qFrom=id=>S.questions.find(q=>q.from_person===id);
-const atDesk=id=>R[id].place==='seat'&&!R[id].walking;
-const inMeeting=id=>R[id].place==='meet'&&!R[id].walking;
-
-async function makeQuestion(task,from){
-  const P={pipo:['Какой цвет главной кнопки оставить?',['Зелёный, как сейчас','Синий, как логотип']],
-    eslarma:['Какую обложку взять для рилса?',['Светлая, крупный текст','Тёмная, с фото']],
-    kunlik:['Какой шрифт взять для заголовков?',['Строгий','Мягкий, округлый']]};
-  let text,options;
-  if(from===ROOMS[task.room].doer){ text=`Подготовила два варианта для «${task.title}». Какой берём?`; options=['Вариант A — проще','Вариант B — ярче']; }
-  else [text,options]=P[task.project]||P.pipo;
-  const {data,error}=await sb.from('questions').insert({task_id:task.id,from_person:from,text,options}).select().single();
-  if(error) return showErr(error);
-  if(!S.questions.some(q=>q.id===data.id)) S.questions.push(data);
-  const p=PEOPLE[from]; log(`${p.name} ${p.fem?'встала':'встал'}: нужен ваш выбор по «${task.title}».`);
-}
-
-/* Пример работы сотрудников. Ведёт его только один открытый экран, остальные просто показывают. */
-let ticking=false;
-async function tick(){
-  if(ticking||!ready) return; ticking=true;
-  try{
-    const {data:lead,error}=await sb.rpc('sim_heartbeat',{cid:CID});
-    if(error) throw error;
-    if(lead && S.demo) await simStep();
-  }catch(e){ showErr(e); }
-  finally{ ticking=false; paint(); }
-}
-async function simStep(){
-  for(const [rid,Rm] of Object.entries(ROOMS)){
-    const dp=PEOPLE[Rm.doer], cp=PEOPLE[Rm.checker];
-    if(S.talk>0 && (qFrom(Rm.doer)||qFrom(Rm.checker))){ await setOffice({talk:0}); }
-    if(S.talk>0){ if(inMeeting(Rm.doer)&&inMeeting(Rm.checker)) await setOffice({talk:S.talk-1}); continue; }
-    let t=doerTask(rid);
-    if(!t){
-      t=S.tasks.find(x=>x.room===rid&&x.status==='queue');
-      if(t){ await patchTask(t,{status:'work',progress:0}); log(`${dp.name} ${dp.fem?'взяла':'взял'} задачу «${t.title}».`); }
-    } else if(!qFrom(Rm.doer) && atDesk(Rm.doer)){
-      const pr=Math.min(100,t.progress+rnd(4,9));
-      if(t.ask_doer&&!t.asked_doer&&pr>=45){ await patchTask(t,{progress:pr,asked_doer:true}); await makeQuestion(t,Rm.doer); }
-      else if(!t.talked&&pr>=70&&!qFrom(Rm.checker)){ await patchTask(t,{progress:pr,talked:true}); await setOffice({talk:4,talk_project:t.project}); log(`${dp.name} ${dp.fem?'позвала':'позвал'} ${cp.acc} в переговорку посоветоваться по «${t.title}».`); }
-      else if(pr>=100){ await patchTask(t,{status:'review',progress:0}); log(`${dp.name} ${dp.fem?'передала':'передал'} «${t.title}» на проверку.`); }
-      else await patchTask(t,{progress:pr});
-    }
-    const c=checkerTask(rid);
-    if(c&&!qFrom(Rm.checker)&&atDesk(Rm.checker)){
-      const pr=Math.min(100,c.progress+rnd(7,12));
-      if(pr>=100){
-        if(c.ask_check&&!c.asked_check){ await patchTask(c,{progress:100,asked_check:true}); await makeQuestion(c,Rm.checker); }
-        else { await patchTask(c,{progress:100,status:'done'}); log(`${cp.name} проверил «${c.title}» — готово.`); }
-      } else await patchTask(c,{progress:pr});
-    }
-  }
-}
-
+const talking=rid=>S.talk>0&&S.talkRoom===rid;
 async function answer(qid,text){
   text=String(text).trim(); if(!text) return;
   const q=S.questions.find(x=>x.id===qid); if(!q) return;
@@ -649,34 +580,31 @@ async function answer(qid,text){
 
 /* ================= Отрисовка состояния ================= */
 function placeFor(id){
-  if(id==='director') return 'seat';
-  for(const [rid,Rm] of Object.entries(ROOMS)){
-    if(id!==Rm.doer && id!==Rm.checker) continue;
-    if(qFrom(id)) return 'stand';
-    if(S.talk>0) return 'meet';
-    const has = id===Rm.doer ? doerTask(rid) : checkerTask(rid);
-    return has ? 'seat' : 'lounge';
-  }
-  return 'seat';
+  if(id==='director') return S.dirVisit ? 'visit_'+S.dirVisit : 'seat';
+  const rid=roomOf(id);
+  if(qFrom(id)) return 'stand';
+  if(talking(rid)) return 'meet';
+  return 'seat'; // без задачи сотрудник не уходит пить кофе — готовится к следующей
 }
 function statusOf(id){
-  const p=PEOPLE[id], r=R[id];
-  if(id==='director') return S.questions.length?`Ждут вашего решения: ${S.questions.length}`:'Раздаёт задания';
+  const r=R[id];
+  if(id==='director'){
+    if(S.dirVisit) return r.walking?`Идёт в «${ROOMS[S.dirVisit].name}»`:`Проверяет комнату «${ROOMS[S.dirVisit].name}»`;
+    if(r.walking) return 'Возвращается в кабинет';
+    return S.questions.length?`Ждут вашего решения: ${S.questions.length} — через 3 мин решит сам`:'Планирует задачи и следит за всеми';
+  }
+  const rid=roomOf(id), Rm=ROOMS[rid];
   if(qFrom(id)) return 'Ждёт вашего ответа';
-  if(r.walking) return r.place==='seat'||placeFor(id)==='seat' ? 'Идёт к столу' : 'Идёт';
+  if(r.walking) return 'Идёт';
   if(r.place==='meet') return 'Советуется в переговорке';
-  if(r.place==='lounge') return p.fem?'Свободна, пьёт кофе':'Свободен, пьёт кофе';
-  for(const [rid,Rm] of Object.entries(ROOMS)) if(id===Rm.checker) return 'Проверяет';
-  return 'Работает';
+  if(id===Rm.checker) return checkerTask(rid)?'Проверяет':Rm.idle;
+  return doerTask(rid)?'Работает':'Берёт следующую задачу';
 }
 function taskOf(id){
-  for(const [rid,Rm] of Object.entries(ROOMS)){
-    if(id===Rm.doer) return doerTask(rid);
-    if(id===Rm.checker) return checkerTask(rid) || (qFrom(id)&&S.tasks.find(t=>t.id===qFrom(id).task_id));
-  }
-  return null;
-}
-function setTag(id,pr,text){
+  const rid=roomOf(id); if(!rid) return null; const Rm=ROOMS[rid];
+  if(id===Rm.doer) return doerTask(rid);
+  return checkerTask(rid) || (qFrom(id)&&S.tasks.find(t=>t.id===qFrom(id).task_id));
+}function setTag(id,pr,text){
   const g=$('#tag-'+id); if(!g) return;
   const pill=g.querySelector('.pill'), pt=g.querySelector('.pill-t'), tt=g.querySelector('.tag-t');
   const label=pr?pr.short:'—'; const w=label.length*4.6+8;
@@ -695,15 +623,15 @@ function paint(){
     const el=$('#p-'+id), r=R[id], q=qFrom(id), t=taskOf(id);
     if(!r.walking){
       el.classList.toggle('asking', !!q && r.place==='stand');
-      el.classList.toggle('busy', r.place==='seat' && !!t && id!=='director');
+      el.classList.toggle('busy', r.place==='seat');
       let say='', kind='';
       if(q && r.place==='stand'){ say='?'; kind='ask'; }
-      else if(r.place==='meet' && S.talk>0){ const tp=TALK[S.talkProject||'pipo']; const Rm=ROOMS.design; say = id===Rm.doer ? tp[0] : tp[1]; }
-      else if(id==='director' && Date.now()<S.dirSayUntil) say='Передал в «Дизайн»';
+      else if(r.place==='meet' && S.talk>0 && S.talkRoom){ const Rm=ROOMS[S.talkRoom]; say = id===Rm.doer ? Rm.talk[0] : Rm.talk[1]; }
+      else if(id==='director' && S.dirNote && (S.dirVisit || Date.now()<S.dirSayUntil)) say=cut(S.dirNote,30);
       setSay(el,say,kind);
     }
-    if(id==='director'){ setTag(id,{short:'Все',color:'#f0a020'},'Раздаёт задания'); $('#nm-director').textContent='Рустам · директор'; }
-    else { const pr=t?proj(t.project):null; setTag(id,pr,t?t.title:'Нет задачи'); $('#nm-'+id).textContent=`${PEOPLE[id].name} · ${PEOPLE[id].role.toLowerCase()}`; }
+    if(id==='director'){ setTag(id,{short:'Все',color:'#f0a020'},S.dirVisit?'Обходит комнаты':'Планирует задачи'); $('#nm-director').textContent='Рустам · директор'; }
+    else { const pr=t?proj(t.project):null; setTag(id,pr,t?t.title:statusOf(id)); $('#nm-'+id).textContent=`${PEOPLE[id].name} · ${PEOPLE[id].role.toLowerCase()}`; }
   }
   // порядок по глубине
   const front=$('#lay-front');
@@ -722,7 +650,7 @@ function paint(){
   PROJECTS.forEach(p=>{ const el=$('#brd-'+p.id); if(el){ const n=S.tasks.filter(t=>t.project===p.id&&t.status!=='done').length; el.textContent=n?`в работе ${n}`:'—'; } });
 
   // верхняя панель
-  const working=Object.keys(PEOPLE).filter(id=>id!=='director'&&R[id].place==='seat'&&taskOf(id)).length;
+  const working=Object.keys(PEOPLE).filter(id=>!qFrom(id)).length;
   $('#cWork').textContent=working;
   $('#cAskN').textContent=S.questions.length; $('#cAsk').classList.toggle('hot',S.questions.length>0);
 
@@ -735,7 +663,7 @@ function paint(){
     const p=PEOPLE[id], t=taskOf(id), pr=t?proj(t.project):null, st=statusOf(id);
     return `<li data-id="${id}"><span class="ava" style="background:${p.look.top}">${esc(p.name[0])}</span>
       <div><div class="s-top"><b>${esc(p.name)}</b><span>${esc(p.role)}</span></div>
-      <div class="s-task">${id==='director'?'Все проекты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t.title)}`:'Нет задачи'}</div>
+      <div class="s-task">${id==='director'?'Все проекты · 4 комнаты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t.title)}`:`Комната «${esc(ROOMS[roomOf(id)].name)}»`}</div>
       <div class="s-st ${qFrom(id)?'wait':''}">${esc(st)}</div>
       ${t&&id!=='director'?`<div class="bar"><i style="width:${t.progress}%"></i></div>`:''}</div></li>`;
   }).join('');
@@ -767,15 +695,15 @@ function openPerson(id){
   $('#sheetBody').innerHTML=`<dl class="facts">
       <dt>Сейчас</dt><dd>${esc(statusOf(id))}</dd>
       <dt>Проект</dt><dd>${id==='director'?'Все проекты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)}`:'—'}</dd>
-      <dt>Задача</dt><dd>${id==='director'?'Раздаёт задания и собирает отчёт':t?esc(t.title):'Нет задачи'}</dd>
+      <dt>Задача</dt><dd>${id==='director'?'Ставит задачи всем комнатам, обходит их, принимает работу и сам решает вопросы, если вы не ответили за 3 минуты':t?esc(t.title):esc(statusOf(id))}</dd>
       ${t&&id!=='director'?`<dt>Готово</dt><dd>${t.progress}%</dd>`:''}
     </dl>${q?qHTML(q,'s'):''}`;
   $('#modal').hidden=false; $('#btnClose').focus();
 }
 function renderReport(){
   const done=S.tasks.filter(t=>t.status==='done'), work=S.tasks.filter(t=>t.status!=='done');
-  const item=t=>{const p=proj(t.project);return `<span class="dot" style="background:${p.color}"></span>${esc(p.name)} — ${esc(t.title)}`};
-  const stage=t=>({queue:'в очереди',work:'делается',review:'на проверке'}[t.status]);
+  const item=t=>{const p=proj(t.project);return `<span class="dot" style="background:${p.color}"></span>${esc(p.name)} — ${esc(t.title)}${ROOMS[t.room]?` <small class="hint">· ${esc(ROOMS[t.room].name)}</small>`:''}`};
+  const stage=t=>(t.room==='auto'?'у директора':{queue:'в очереди',work:'делается',review:'на проверке'}[t.status]);
   $('#sheetBody').innerHTML=`<div class="rep">
     <p class="summary">Готово: ${done.length}. В работе: ${work.length}. Ждёт вашего решения: ${S.questions.length}.</p>
     <h3>Ждёт вашего решения</h3>
@@ -793,7 +721,7 @@ function setup(){
   G = geometry();
   buildScene();
   for(const id of Object.keys(PEOPLE)){ R[id].walking=false; R[id].place=null; R[id].x=null; goTo(id, placeFor(id), true); }
-  $('#fbRooms').textContent = Object.keys(ROOMS).length===1 ? '1 комната' : Object.keys(ROOMS).length+' комнаты';
+  $('#fbRooms').textContent = Object.keys(ROOMS).length+' комнаты · '+Object.keys(PEOPLE).length+' сотрудников';
   qKey='x'; paint();
 }
 mqTall.addEventListener('change', setup);
@@ -803,15 +731,13 @@ $('#taskForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const title=$('#taskText').value.trim(); if(!title) return;
   const btn=e.submitter; if(btn) btn.disabled=true;
-  const row={title,project:$('#taskProject').value,room:$('#taskRoom').value,status:'queue',progress:0,ask_doer:true,ask_check:false};
+  const row={title,project:$('#taskProject').value,room:$('#taskRoom').value,status:'queue',progress:0,ask_doer:true,ask_check:false,by_director:false};
   const {data,error}=await sb.from('tasks').insert(row).select().single();
   if(btn) btn.disabled=false;
   if(error) return showErr(error);
   if(!S.tasks.some(t=>t.id===data.id)) S.tasks.push(data);
   $('#taskText').value='';
   log(`Вы дали задание: «${title}» (${proj(data.project).name}).`,true);
-  log(`Директор передал «${title}» в комнату «${ROOMS[data.room].name}».`);
-  setOffice({dir_say_until:new Date(Date.now()+6000).toISOString()});
   paint();
 });
 function onAnswerClick(e){ const b=e.target.closest('button[data-i]'); if(!b) return; const q=S.questions.find(x=>x.id==b.dataset.q); if(q) answer(q.id,q.options[b.dataset.i]); }
@@ -880,7 +806,6 @@ async function startApp(){
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden && ready) loadAll().then(paint).catch(showErr); });
 
 setup();
-setInterval(tick,2500);
 setInterval(()=>{ if(ready) paint(); },1000);
 if(!sb){ showLogin('in'); lgMsg('Не загрузилась связь с базой. Проверьте интернет и обновите страницу.'); }
 else sb.auth.getSession().then(({data})=>{ if(data.session) startApp(); else showLogin('in'); });
