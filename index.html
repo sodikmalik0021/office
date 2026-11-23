@@ -329,7 +329,7 @@ function playPcm(bytes,rate,state,key){
   const n=bytes.length>>1; if(!n) return;
   const dv=new DataView(bytes.buffer,bytes.byteOffset,n*2), buf=actx.createBuffer(1,n,rate), ch=buf.getChannelData(0);
   for(let i=0;i<n;i++) ch[i]=dv.getInt16(i*2,true)/32768;
-  const src=actx.createBufferSource(); src.buffer=buf; src.connect(actx.destination);
+  const src=actx.createBufferSource(); src.buffer=buf; src.connect(outNode||actx.destination);
   const at=Math.max(state.t, actx.currentTime+0.03); src.start(at); state.t=at+buf.duration;
   saySrc.push(src); state.last=src;
   if(sayLoading===key){ sayLoading=''; markSay(); }
@@ -343,13 +343,14 @@ async function speak(who,text,key){
   if(was===key) return; // второе нажатие — остановить
   sayKey=key; sayLoading=key; markSay();
   try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    audioOut();
     if(actx.state==='suspended') await actx.resume();
+    if(outEl && outEl.paused) outEl.play().catch(()=>{});
     const ck=who+'|'+text, state={t:0,last:null};
     const saved=voiceCache.get(ck);
     if(saved){ playPcm(saved.bytes,saved.rate,state,key); finishWhenDone(state,key); return; }
-    const r=await ttsFetch({who,text});
-    if(!r.ok||!r.body) throw new Error('tts '+r.status);
+    const r=await ttsFetch({who,text,stream:true});
+    if(!r.ok||!r.body) throw new Error('сервер ответил '+r.status);
     if(sayKey!==key) return; // пока ждали, нажали другую кнопку
     const rate=+((r.headers.get('content-type')||'').match(/rate=(\d+)/)?.[1]||24000);
     const reader=r.body.getReader(); sayReader=reader;
@@ -368,11 +369,28 @@ async function speak(who,text,key){
     }
     sayReader=null;
     const total=all.reduce((s,a)=>s+a.length,0), full=new Uint8Array(total); let o=0; for(const a of all){ full.set(a,o); o+=a.length; }
-    if(total>1000) voiceCache.set(ck,{bytes:full,rate});
+    if(total<1000) throw new Error('пришёл пустой звук');
+    voiceCache.set(ck,{bytes:full,rate});
     finishWhenDone(state,key);
   }catch(e){
     console.warn('Живой голос недоступен, читает браузер:',e);
+    voiceErr('Живой голос не включился ('+(e&&e.message||e)+'). Читаю обычным голосом.');
     if(sayKey===key){ sayLoading=''; speakLocal(who,text,key); }
+  }
+}
+function voiceErr(t){ const n=$('#netErr'); if(!n) return; n.hidden=false; n.textContent=t; clearTimeout(voiceErr.t); voiceErr.t=setTimeout(()=>n.hidden=true,7000); }
+/* Куда идёт звук. На iPhone звук из Web Audio глушится переключателем «без звука»,
+   поэтому там пускаем его через обычный аудиоплеер — как музыку. */
+let outEl=null, outNode=null;
+function audioOut(){
+  if(actx) return;
+  try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch{}
+  actx=new (window.AudioContext||window.webkitAudioContext)();
+  outNode=actx.destination;
+  const iOS=/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  if(iOS && actx.createMediaStreamDestination){
+    const dest=actx.createMediaStreamDestination(); outNode=dest;
+    outEl=new Audio(); outEl.setAttribute('playsinline',''); outEl.srcObject=dest.stream; outEl.play().catch(()=>{});
   }
 }
 function speakLocal(who,text,key){

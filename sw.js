@@ -1,6 +1,6 @@
 // Офис: запоминает страницу, чтобы приложение открывалось быстро.
 // Сначала берёт свежую версию из интернета, без сети — сохранённую.
-const CACHE = 'office-v7';
+const CACHE = 'office-v8';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -15,7 +15,7 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   if (new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request.url, { cache: 'no-cache' }) // всегда спрашиваем свежую версию, а не 10-минутную копию
       .then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r; })
       .catch(() => caches.match(e.request))
   );
