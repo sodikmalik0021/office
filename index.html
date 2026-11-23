@@ -146,6 +146,8 @@ main{display:grid;gap:16px;padding-block:14px 40px}
 .say-btn svg{width:16px;height:16px;flex:none}
 .say-btn:hover{background:#eef6f4}
 .say-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.say-btn.wait svg{animation:sayPulse .7s ease-in-out infinite alternate}
+@keyframes sayPulse{to{opacity:.3}}
 .feed .say-btn{padding:0;width:32px}
 .q-text-row{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 footer{text-align:center}
@@ -304,11 +306,36 @@ const FEM=/(irina|svetlana|dariya|daria|ekaterina|milena|alena|anna|tatyana|fema
 let ruVoices=[];
 function loadVoices(){ if(!window.speechSynthesis) return; ruVoices=speechSynthesis.getVoices().filter(v=>/^ru/i.test(v.lang)); }
 if(window.speechSynthesis){ loadVoices(); speechSynthesis.addEventListener?.('voiceschanged',loadVoices); }
-let sayKey='';
-function speak(who,text,key){
-  if(!window.speechSynthesis) return alert('Этот браузер не умеет читать вслух. Откройте офис в Chrome или Edge.');
-  const was=sayKey; speechSynthesis.cancel(); sayKey=''; markSay();
+let sayKey='', sayAudio=null, sayLoading='';
+const voiceCache=new Map(); // уже скачанные фразы этого экрана
+function stopSay(){ if(window.speechSynthesis) speechSynthesis.cancel(); if(sayAudio){ sayAudio.pause(); sayAudio=null; } sayKey=''; sayLoading=''; markSay(); }
+/* Живой голос: сервер (функция tts) озвучивает фразу нейросетью и помнит её. Не получилось — читает голос браузера. */
+async function speak(who,text,key){
+  const was=sayKey; stopSay();
   if(was===key) return; // второе нажатие — остановить
+  sayKey=key; sayLoading=key; markSay();
+  try{
+    const ck=who+'|'+text; let url=voiceCache.get(ck);
+    if(!url){
+      const {data:{session}}=await sb.auth.getSession();
+      const r=await fetch(SB_URL+'/functions/v1/tts',{method:'POST',
+        headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(session?.access_token||SB_KEY)},
+        body:JSON.stringify({who,text})});
+      if(!r.ok) throw new Error('tts '+r.status);
+      url=URL.createObjectURL(await r.blob()); voiceCache.set(ck,url);
+    }
+    if(sayKey!==key) return; // пока грузили, нажали другую кнопку
+    sayLoading=''; markSay();
+    const a=new Audio(url); sayAudio=a;
+    a.onended=a.onerror=()=>{ if(sayKey===key){ sayKey=''; sayAudio=null; markSay(); } };
+    await a.play();
+  }catch(e){
+    console.warn('Живой голос недоступен, читает браузер:',e);
+    if(sayKey===key){ sayLoading=''; speakLocal(who,text,key); }
+  }
+}
+function speakLocal(who,text,key){
+  if(!window.speechSynthesis){ sayKey=''; markSay(); return alert('Не получилось включить голос. Проверьте интернет.'); }
   const c=VOICES[who]||VOICES.director, u=new SpeechSynthesisUtterance(text);
   u.lang='ru-RU'; u.rate=c.rate; u.volume=c.vol; u.pitch=c.pitch;
   const fem=ruVoices.filter(v=>FEM.test(v.name)||!MAL.test(v.name)), mal=ruVoices.filter(v=>MAL.test(v.name));
@@ -318,7 +345,7 @@ function speak(who,text,key){
   sayKey=key; markSay();
   speechSynthesis.speak(u);
 }
-function markSay(){ document.querySelectorAll('.say-btn').forEach(b=>b.classList.toggle('on', b.dataset.key===sayKey)); }
+function markSay(){ document.querySelectorAll('.say-btn').forEach(b=>{ b.classList.toggle('on', b.dataset.key===sayKey); b.classList.toggle('wait', b.dataset.key===sayLoading); }); }
 const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
 function sayBtn(who,text,key,label){
   const name=(PEOPLE[who]||PEOPLE.director).name;
