@@ -141,6 +141,13 @@ main{display:grid;gap:16px;padding-block:14px 40px}
 .feed li{display:flex;gap:10px;font-size:.88rem}
 .feed time{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
 .feed li.me{font-weight:600}
+.feed li span{flex:1;min-width:0}
+.say-btn{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:32px;min-width:32px;padding:0 9px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;justify-content:center}
+.say-btn svg{width:16px;height:16px;flex:none}
+.say-btn:hover{background:#eef6f4}
+.say-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.feed .say-btn{padding:0;width:32px}
+.q-text-row{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 footer{text-align:center}
 .link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;min-height:44px}
 
@@ -280,6 +287,47 @@ const PEOPLE = {
   kamila:{name:'Камила', role:'Проверяет цифры', fem:true, dat:'Камиле',
     look:{skin:'#e8bb96', hair:'#1c120d', style:'long', top:'#c94f6d', pants:'#2f3640', kind:'sweater'}}
 };
+/* ================= Голоса: кнопка «Прочитать» ================= */
+// g — женский/мужской; pitch — высота; rate — скорость; vol — громкость (директор громче всех, Камила и Дилноза — нежно и тихо)
+const VOICES = {
+  director:{g:'m', pitch:.85, rate:.95, vol:1},
+  malika:  {g:'f', pitch:1.15, rate:1,   vol:.9, pick:0},
+  timur:   {g:'m', pitch:1,    rate:1,   vol:.85},
+  aziz:    {g:'m', pitch:.95,  rate:1.05,vol:.85},
+  nigora:  {g:'f', pitch:1.05, rate:1,   vol:.85, pick:1},
+  dilnoza: {g:'f', pitch:1.4,  rate:.88, vol:.72, pick:0},
+  bobur:   {g:'m', pitch:.8,   rate:.95, vol:.85},
+  shahzod: {g:'m', pitch:1.08, rate:1.02,vol:.85},
+  kamila:  {g:'f', pitch:1.45, rate:.86, vol:.72, pick:1}
+};
+const FEM=/(irina|svetlana|dariya|daria|ekaterina|milena|alena|anna|tatyana|female|google)/i, MAL=/(pavel|dmitr|yuri|maxim|male)/i;
+let ruVoices=[];
+function loadVoices(){ if(!window.speechSynthesis) return; ruVoices=speechSynthesis.getVoices().filter(v=>/^ru/i.test(v.lang)); }
+if(window.speechSynthesis){ loadVoices(); speechSynthesis.addEventListener?.('voiceschanged',loadVoices); }
+let sayKey='';
+function speak(who,text,key){
+  if(!window.speechSynthesis) return alert('Этот браузер не умеет читать вслух. Откройте офис в Chrome или Edge.');
+  const was=sayKey; speechSynthesis.cancel(); sayKey=''; markSay();
+  if(was===key) return; // второе нажатие — остановить
+  const c=VOICES[who]||VOICES.director, u=new SpeechSynthesisUtterance(text);
+  u.lang='ru-RU'; u.rate=c.rate; u.volume=c.vol; u.pitch=c.pitch;
+  const fem=ruVoices.filter(v=>FEM.test(v.name)||!MAL.test(v.name)), mal=ruVoices.filter(v=>MAL.test(v.name));
+  if(c.g==='m'){ if(mal.length) u.voice=mal[0]; else { u.voice=ruVoices[0]||null; u.pitch=Math.max(.1,c.pitch-.45); } } // нет мужского голоса — делаем ниже
+  else { const list=fem.length?fem:ruVoices; u.voice=list[(c.pick||0)%Math.max(1,list.length)]||null; }
+  u.onend=u.onerror=()=>{ if(sayKey===key){ sayKey=''; markSay(); } };
+  sayKey=key; markSay();
+  speechSynthesis.speak(u);
+}
+function markSay(){ document.querySelectorAll('.say-btn').forEach(b=>b.classList.toggle('on', b.dataset.key===sayKey)); }
+const SPK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+function sayBtn(who,text,key,label){
+  const name=(PEOPLE[who]||PEOPLE.director).name;
+  return `<button type="button" class="say-btn${sayKey===key?' on':''}" data-who="${who}" data-key="${esc(key)}" data-text="${esc(text)}" aria-label="Прочитать голосом: ${esc(name)}" title="Прочитать голосом: ${esc(name)}">${SPK}${label?`<span>${label}</span>`:''}</button>`;
+}
+// кто говорит в ленте: по имени в начале сообщения
+function speakerOf(text){ return Object.keys(PEOPLE).find(id=>text.startsWith(PEOPLE[id].name+' '))||'director'; }
+document.addEventListener('click',e=>{ const b=e.target.closest('.say-btn'); if(b){ e.preventDefault(); speak(b.dataset.who,b.dataset.text,b.dataset.key); } });
+
 const proj = id => PROJECTS.find(p=>p.id===id) || PROJECTS[0];
 const roomOf = id => Object.keys(ROOMS).find(r=>ROOMS[r].doer===id||ROOMS[r].checker===id);
 
@@ -671,7 +719,7 @@ function paint(){
   // лента
   $('#feed').innerHTML=S.feed.slice().reverse().map(f=>{
     const d=new Date(f.created_at), hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    return `<li class="${f.by_me?'me':''}"><time>${hm}</time><span>${esc(f.text)}</span></li>`;
+    return `<li class="${f.by_me?'me':''}"><time>${hm}</time><span>${esc(f.text)}</span>${f.by_me?'':sayBtn(speakerOf(f.text),f.text,'e'+f.id)}</li>`;
   }).join('');
   if(!$('#modal').hidden && sheetMode==='report') renderReport();
 }
@@ -680,7 +728,7 @@ function qHTML(q,pre){
   const t=S.tasks.find(x=>x.id===q.task_id), p=PEOPLE[q.from_person], pr=proj(t?t.project:'pipo');
   return `<div class="q" id="${pre}-q-${q.id}">
     <div class="q-head"><b>${esc(p.name)}</b> ${esc(p.role.toLowerCase())} · <span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)} · ${esc(t?t.title:'')}</div>
-    <p class="q-text">${esc(q.text)}</p>
+    <div class="q-text-row"><p class="q-text">${esc(q.text)}</p>${sayBtn(q.from_person, q.text+' Варианты: '+q.options.join(', или ')+'.', pre+'q'+q.id, 'Прочитать')}</div>
     <div class="q-opts">${q.options.map((o,i)=>`<button class="btn" type="button" data-q="${q.id}" data-i="${i}">${esc(o)}</button>`).join('')}</div>
     <form class="q-own" data-q="${q.id}"><input id="${pre}-own-${q.id}" aria-label="Свой ответ" placeholder="Или напишите свой ответ" autocomplete="off"><button class="btn primary" type="submit">Ответить</button></form>
   </div>`;
@@ -697,7 +745,9 @@ function openPerson(id){
       <dt>Проект</dt><dd>${id==='director'?'Все проекты':pr?`<span class="dot" style="background:${pr.color}"></span> ${esc(pr.name)}`:'—'}</dd>
       <dt>Задача</dt><dd>${id==='director'?'Ставит задачи всем комнатам, обходит их, принимает работу и сам решает вопросы, если вы не ответили за 3 минуты':t?esc(t.title):esc(statusOf(id))}</dd>
       ${t&&id!=='director'?`<dt>Готово</dt><dd>${t.progress}%</dd>`:''}
-    </dl>${q?qHTML(q,'s'):''}`;
+    </dl>
+    <p style="margin:0 0 12px">${sayBtn(id, `Я ${p.name}, ${p.role.toLowerCase()}. ${statusOf(id)}.${id==='director'?' Ставлю задачи всем комнатам и слежу за работой.':t?` Сейчас делаю задачу «${t.title}», готово ${t.progress} процентов.`:''}`, 'p-'+id, 'Прочитать')}</p>
+    ${q?qHTML(q,'s'):''}`;
   $('#modal').hidden=false; $('#btnClose').focus();
 }
 function renderReport(){
